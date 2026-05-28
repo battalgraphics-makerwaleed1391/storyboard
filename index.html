@@ -1787,9 +1787,9 @@ function clearOutput() {
 ═══════════════════════════════════════ */
 async function callAPI({ system, userText, userContent }) {
   const messages = [{ role: 'user', content: userContent || [{ type: 'text', text: userText }] }];
-  const res = await fetch('https://raspy-lab-1335.battal-graphics.workers.dev', {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'x-api-key': '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', 'anthropic-version': '2023-06-01' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 4000,
