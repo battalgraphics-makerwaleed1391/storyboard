@@ -1,0 +1,1873 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storyboard Prompt Builder ✦</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Cairo:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #050608;
+  --surface:  #0b0d11;
+  --surface2: #0f1117;
+  --surface3: #141820;
+  --border:   #1c2130;
+  --border2:  #253040;
+  --gold:     #c9a84c;
+  --gold2:    #e8c97a;
+  --gold-dim: #7a6030;
+  --gold-glow: rgba(201,168,76,0.08);
+  --accent:   #3b82f6;
+  --teal:     #00c9a7;
+  --danger:   #ef4444;
+  --text:     #dde3ec;
+  --text-dim: #7a8899;
+  --text-muted: #3d4f60;
+  --radius:   10px;
+  --radius-sm: 6px;
+  --font-display: 'Cinzel', serif;
+  --font-body:    'Cairo', sans-serif;
+  --font-mono:    'IBM Plex Mono', monospace;
+}
+
+*, ::before, ::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  min-height: 100vh;
+  direction: rtl;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0; opacity: 0.4;
+}
+body::after {
+  content: '';
+  position: fixed; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--gold2), var(--gold), transparent);
+  z-index: 100;
+}
+
+.page-wrap {
+  position: relative; z-index: 1;
+  max-width: 860px; margin: 0 auto;
+  padding: 32px 16px 100px;
+}
+
+/* HEADER */
+.header {
+  text-align: center; margin-bottom: 40px;
+  padding: 36px 24px; position: relative;
+}
+.header::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 70%);
+  border-radius: var(--radius); pointer-events: none;
+}
+.header-eyebrow {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 4px; color: var(--gold-dim);
+  text-transform: uppercase; margin-bottom: 12px;
+}
+.header-title {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 4vw, 34px); font-weight: 700;
+  color: var(--gold2); letter-spacing: 2px;
+  text-shadow: 0 0 40px rgba(201,168,76,0.3); margin-bottom: 8px;
+}
+.header-sub { font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); }
+.header-line {
+  width: 120px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  margin: 16px auto 0;
+}
+
+/* SECTION */
+.section {
+  margin-bottom: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+  transition: border-color 0.2s;
+}
+.section:hover { border-color: var(--border2); }
+.section-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(90deg, var(--surface2), var(--surface));
+  cursor: pointer; user-select: none;
+}
+.section-header:hover { background: linear-gradient(90deg, rgba(201,168,76,0.08), var(--surface2)); }
+.section-icon {
+  font-size: 16px; width: 28px; height: 28px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--gold-glow); border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 6px; flex-shrink: 0;
+}
+.section-title { font-family: var(--font-display); font-size: 13px; color: var(--gold2); letter-spacing: 1px; }
+.section-title-ar { font-family: var(--font-body); font-size: 13px; font-weight: 600; color: var(--text); }
+.section-chevron {
+  margin-right: auto; font-size: 11px; color: var(--gold2);
+  transition: transform 0.25s; flex-shrink: 0;
+}
+.section-chevron.open { transform: rotate(180deg); }
+.section-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+.section-body.collapsed { display: none; }
+
+/* STORY INPUT */
+.story-input-section {
+  margin-bottom: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--gold-dim);
+  border-radius: 14px; overflow: hidden; position: relative;
+}
+.story-input-section::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.04) 0%, transparent 60%);
+  pointer-events: none;
+}
+.story-input-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none;
+}
+.story-input-header:hover { background: rgba(201,168,76,0.06); }
+.story-input-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+.story-input-body.hidden { display: none; }
+
+/* FIELDS */
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field-label {
+  display: flex; align-items: baseline; gap: 0;
+  font-size: 10px; font-family: var(--font-mono);
+  color: var(--gold-dim); text-transform: uppercase; letter-spacing: 1.5px;
+}
+.field-label .sep { color: var(--text-muted); margin: 0 7px; font-size: 10px; }
+.field-label-ar {
+  font-size: 11px; font-family: var(--font-body);
+  color: var(--text-dim); font-weight: 600;
+  letter-spacing: 0; text-transform: none;
+}
+
+input[type=text], input[type=number], textarea, select {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); color: var(--text);
+  font-family: var(--font-body); font-size: 13px;
+  padding: 9px 12px; width: 100%; outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s; direction: rtl;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--gold-dim); box-shadow: 0 0 0 3px rgba(201,168,76,0.07);
+}
+textarea { resize: vertical; min-height: 60px; }
+select {
+  cursor: pointer; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8899' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: left 10px center; padding-left: 32px;
+}
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* STORY TEXTAREA */
+.story-textarea {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: var(--radius); color: var(--text);
+  font-family: var(--font-body); font-size: 14px; line-height: 1.7;
+  padding: 14px 16px; width: 100%; min-height: 120px;
+  resize: vertical; outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s; direction: rtl;
+}
+.story-textarea:focus { border-color: var(--gold-dim); box-shadow: 0 0 0 3px rgba(201,168,76,0.07); }
+.story-textarea::placeholder { color: var(--text-muted); }
+
+/* BUTTONS */
+.btn-fill-form {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 13px 24px;
+  background: linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.08));
+  border: 1px solid var(--gold-dim); border-radius: var(--radius);
+  color: var(--gold2); font-family: var(--font-display);
+  font-size: 13px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s;
+}
+.btn-fill-form:hover {
+  border-color: var(--gold2);
+  background: linear-gradient(135deg, rgba(201,168,76,0.25), rgba(201,168,76,0.12));
+  box-shadow: 0 0 20px rgba(201,168,76,0.15);
+}
+.btn-fill-form:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-rephrase {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; padding: 12px 24px;
+  background: linear-gradient(135deg, rgba(0,201,167,0.14), rgba(0,201,167,0.06));
+  border: 1px solid rgba(0,201,167,0.4); border-radius: var(--radius);
+  color: var(--teal); font-family: var(--font-display);
+  font-size: 13px; letter-spacing: 1px; cursor: pointer; transition: all 0.2s;
+}
+.btn-rephrase:hover {
+  background: linear-gradient(135deg, rgba(0,201,167,0.22), rgba(0,201,167,0.1));
+  border-color: var(--teal); box-shadow: 0 0 20px rgba(0,201,167,0.12);
+}
+.btn-rephrase:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-add-char, .btn-add-shot {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 11px;
+  background: transparent; border: 1px dashed var(--border2);
+  border-radius: var(--radius); color: var(--text-dim);
+  font-size: 12px; font-family: var(--font-body); cursor: pointer; transition: all 0.15s; margin-top: 4px;
+}
+.btn-add-char:hover { border-color: var(--gold-dim); color: var(--gold2); background: var(--gold-glow); }
+.btn-add-shot:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.05); }
+
+.btn-analyze-img {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 12px; background: rgba(201,168,76,0.08);
+  border: 1px solid rgba(201,168,76,0.25); border-radius: var(--radius-sm);
+  color: var(--gold2); font-size: 11px; font-family: var(--font-body);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.btn-analyze-img:hover { background: rgba(201,168,76,0.15); border-color: var(--gold-dim); }
+.btn-analyze-img:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-gen-char-prompt {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  background: linear-gradient(135deg, rgba(99,179,237,0.12), rgba(99,179,237,0.06));
+  border: 1px solid rgba(99,179,237,0.3); border-radius: var(--radius-sm);
+  color: #90cdf4; font-size: 11px; font-family: var(--font-body);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap; width: fit-content;
+}
+.btn-gen-char-prompt:hover { background: rgba(99,179,237,0.2); border-color: rgba(99,179,237,0.5); }
+.btn-gen-char-prompt:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-copy-char-prompt {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; background: rgba(72,187,120,0.08);
+  border: 1px solid rgba(72,187,120,0.25); border-radius: var(--radius-sm);
+  color: #9ae6b4; font-size: 11px; font-family: var(--font-body);
+  cursor: pointer; transition: all 0.15s; white-space: nowrap; width: fit-content;
+}
+.btn-copy-char-prompt:hover { background: rgba(72,187,120,0.15); }
+
+/* LOADING */
+.fill-loading {
+  display: none; align-items: center; gap: 10px;
+  padding: 10px 14px; background: var(--surface2);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: 12px; font-family: var(--font-mono); color: var(--text-dim);
+}
+.fill-loading.show { display: flex; }
+.fill-loading-ring {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(201,168,76,0.2); border-top-color: var(--gold);
+  border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0;
+}
+
+.char-analyzing { font-size: 11px; font-family: var(--font-mono); color: var(--gold-dim); display: none; align-items: center; gap: 6px; }
+.char-analyzing.show { display: flex; }
+.char-analyzing-ring { width: 12px; height: 12px; border: 2px solid rgba(201,168,76,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin .7s linear infinite; flex-shrink: 0; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+
+/* CHARACTER CARDS */
+.chars-container { display: flex; flex-direction: column; gap: 10px; }
+.char-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px; position: relative; transition: border-color 0.15s;
+}
+.char-card:hover { border-color: var(--border2); }
+.char-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;
+}
+.char-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-dim), rgba(201,168,76,0.3));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: var(--gold2); font-family: var(--font-mono); flex-shrink: 0;
+}
+.char-title { font-size: 12px; font-family: var(--font-mono); color: var(--text-dim); }
+.char-remove {
+  margin-right: auto; background: none; border: none; color: var(--text-muted);
+  font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.15s;
+}
+.char-remove:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
+.char-collapse-btn { background: none; border: none; color: var(--text-muted); font-size: 12px; cursor: pointer; padding: 4px; transition: transform 0.2s; }
+.char-collapse-btn.open { transform: rotate(180deg); }
+.char-body.collapsed { display: none; }
+
+/* CHAR IMAGE */
+.char-img-wrap { position: relative; width: 72px; height: 72px; flex-shrink: 0; }
+.char-img-preview { width: 72px; height: 72px; border-radius: 10px; object-fit: cover; border: 2px solid var(--border2); display: none; cursor: pointer; }
+.char-img-placeholder {
+  width: 72px; height: 72px; border-radius: 10px; border: 2px dashed var(--border2);
+  background: var(--surface2); display: flex; flex-direction: column; align-items: center;
+  justify-content: center; cursor: pointer; transition: all 0.15s; gap: 4px;
+}
+.char-img-placeholder:hover { border-color: var(--gold-dim); background: var(--gold-glow); }
+.char-img-placeholder-icon { font-size: 20px; }
+.char-img-placeholder-text { font-size: 9px; color: var(--text-muted); font-family: var(--font-mono); text-align: center; }
+.char-img-input { display: none; }
+.char-img-delete {
+  position: absolute; top: -6px; left: -6px; width: 20px; height: 20px;
+  background: var(--danger); border: 2px solid var(--surface); border-radius: 50%;
+  color: #fff; font-size: 10px; font-weight: 700; cursor: pointer;
+  display: none; align-items: center; justify-content: center; z-index: 10; transition: all 0.15s;
+}
+.char-img-delete:hover { background: #c0392b; transform: scale(1.15); }
+
+/* CHAR PROMPT BOX */
+.char-prompt-box { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+.char-prompt-label { font-size: 10px; font-family: var(--font-mono); color: var(--gold2); letter-spacing: 1px; text-transform: uppercase; }
+.char-prompt-output {
+  width: 100%; min-height: 90px; background: var(--surface2);
+  border: 1px solid var(--border2); border-radius: var(--radius-sm);
+  color: var(--text); font-family: var(--font-mono); font-size: 11px; line-height: 1.7;
+  padding: 10px 12px; resize: vertical; box-sizing: border-box; direction: ltr; text-align: left;
+}
+.char-prompt-output::placeholder { color: var(--text-dim); }
+
+/* SHOT CARDS */
+.shots-container { display: flex; flex-direction: column; gap: 16px; }
+.shot-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden; transition: border-color 0.15s;
+}
+.shot-card:hover { border-color: var(--border2); }
+.shot-header {
+  display: flex; align-items: center; gap: 10px; padding: 12px 16px;
+  background: linear-gradient(90deg, var(--surface3), var(--surface2));
+  border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
+}
+.shot-num {
+  width: 28px; height: 28px; border-radius: 6px;
+  background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 11px; color: var(--gold2); flex-shrink: 0;
+}
+.shot-name-preview { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+.shot-collapse-btn { background: none; border: none; color: var(--text-muted); font-size: 12px; cursor: pointer; padding: 4px; transition: transform 0.2s; }
+.shot-collapse-btn.open { transform: rotate(180deg); }
+.shot-remove { background: none; border: none; color: var(--text-muted); font-size: 13px; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: all 0.15s; }
+.shot-remove:hover { background: rgba(239,68,68,0.1); color: var(--danger); }
+.shot-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.shot-body.collapsed { display: none; }
+
+/* TOGGLE BUTTONS */
+.sound-row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--surface3); border-radius: var(--radius-sm); border: 1px solid var(--border); }
+.sound-label { font-size: 12px; font-family: var(--font-mono); color: var(--text-dim); flex: 1; }
+.toggle-group { display: flex; gap: 6px; }
+.toggle-btn { padding: 4px 12px; border-radius: 999px; border: 1px solid var(--border2); background: transparent; color: var(--text-muted); font-size: 11px; font-family: var(--font-mono); cursor: pointer; transition: all 0.15s; }
+.toggle-btn.yes.active { background: rgba(0,201,167,0.15); border-color: var(--teal); color: var(--teal); }
+.toggle-btn.no.active { background: rgba(239,68,68,0.1); border-color: var(--danger); color: var(--danger); }
+
+/* STYLE PICKER */
+.style-field-row {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+}
+.style-field-row .field-label { width: 100%; }
+.style-selected-box {
+  width: 160px; height: 110px; flex-shrink: 0;
+  background: var(--surface2); border: 2px dashed var(--border2);
+  border-radius: var(--radius); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; cursor: pointer;
+  transition: border-color 0.2s, background 0.2s; position: relative; overflow: hidden;
+}
+.style-selected-box:hover { border-color: var(--gold-dim); background: rgba(201,168,76,0.04); }
+.style-selected-box.has-selection { border-style: solid; border-color: var(--gold-dim); }
+.style-selected-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: calc(var(--radius) - 2px); display: block; }
+.style-box-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 40%);
+  border-radius: calc(var(--radius) - 2px);
+  display: flex; align-items: flex-end; justify-content: space-between; padding: 5px 7px;
+}
+.style-box-name { font-family: var(--font-display); font-size: 9px; color: #fff; letter-spacing: 0.5px; }
+.style-box-change { font-size: 8px; font-family: var(--font-mono); color: var(--gold2); background: rgba(0,0,0,0.5); border: 1px solid var(--gold-dim); border-radius: 3px; padding: 2px 5px; cursor: pointer; }
+.style-add-icon { font-size: 16px; color: var(--gold-dim); line-height: 1; margin-bottom: 3px; }
+.style-add-label { font-size: 8px; font-family: var(--font-mono); color: var(--text-dim); letter-spacing: 0.5px; text-align: center; padding: 0 4px; }
+
+/* SHOT SIZE / CAM POS PICKERS */
+.shot-size-campos-row { display: flex; gap: 12px; align-items: flex-start; }
+.shot-size-campos-row .field { flex: 1; }
+.shot-size-box, .cam-pos-selected-box {
+  width: 100%; aspect-ratio: 4/3; background: var(--surface2); border: 2px dashed var(--border2);
+  border-radius: var(--radius); display: flex; flex-direction: column; align-items: center;
+  justify-content: center; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+}
+.shot-size-box:hover, .cam-pos-selected-box:hover { border-color: var(--gold-dim); background: rgba(201,168,76,0.04); }
+.shot-size-box.has-selection, .cam-pos-selected-box.has-selection { border-style: solid; border-color: var(--gold-dim); }
+
+/* MODAL */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.75); z-index: 1000;
+  align-items: center; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: #0f1117; border: 1px solid var(--border); border-radius: var(--radius);
+  width: min(720px, 95vw); max-height: 80vh; display: flex; flex-direction: column;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.8);
+}
+.modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.modal-title { font-family: var(--font-display); font-size: 13px; color: var(--gold2); letter-spacing: 2px; }
+.modal-close {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3);
+  color: #fca5a5; font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-close:hover { background: rgba(239,68,68,0.25); }
+.modal-body {
+  overflow-x: hidden; overflow-y: auto; padding: 16px;
+  display: grid; grid-template-columns: 330px 330px; grid-auto-rows: 208px; gap: 12px;
+  justify-content: center;
+  scrollbar-width: thin; scrollbar-color: var(--gold-dim) var(--surface2);
+}
+.modal-body::-webkit-scrollbar { width: 6px; }
+.modal-body::-webkit-scrollbar-track { background: var(--surface2); border-radius: 3px; }
+.modal-body::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+.style-card {
+  border-radius: var(--radius-sm); overflow: hidden; cursor: pointer;
+  border: 2px solid transparent; transition: all 0.18s; background: var(--surface2);
+  width: 330px; height: 208px; flex-shrink: 0; flex-grow: 0;
+}
+.style-card:hover { border-color: var(--gold-dim); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.4); }
+.style-card.selected { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.2); }
+.style-card-img-wrap {
+  width: 330px; height: 150px; position: relative; overflow: hidden;
+  background: var(--surface2);
+}
+.style-card-img {
+  width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.3s ease;
+  display: block;
+}
+.style-card:hover .style-card-img { transform: scale(1.06); }
+.style-card-img-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, transparent 50%);
+  display: flex; align-items: flex-end; padding: 6px 8px;
+}
+.style-card-emoji { font-size: 22px; line-height: 1; }
+
+.style-card-no-img { width: 330px; height: 150px; background: linear-gradient(135deg, var(--surface2), #1a1e2a); display: flex; align-items: center; justify-content: center; font-size: 52px; }
+.style-card-label { padding: 10px 12px; text-align: center; height: 58px; display: flex; flex-direction: column; justify-content: center; }
+.style-card-en { font-size: 14px; font-weight: 600; color: var(--text); font-family: var(--font-body); display: block; line-height: 1.3; }
+.style-card-ar { font-size: 12px; color: var(--text-dim); font-family: var(--font-body); display: block; margin-top: 3px; }
+
+.custom-style-wrap { display: none; margin-top: 8px; }
+.custom-style-wrap.show { display: block; }
+
+/* LAST FRAME */
+.lastframe-section { margin-bottom: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+.lastframe-toggle-bar { display: flex; align-items: center; gap: 10px; padding: 14px 20px; cursor: pointer; user-select: none; transition: background 0.15s; }
+.lastframe-toggle-bar:hover { background: var(--surface2); }
+.lastframe-badge { font-size: 10px; font-family: var(--font-mono); padding: 3px 8px; border-radius: 999px; background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.25); color: var(--accent); letter-spacing: 1px; }
+.lastframe-body { padding: 18px 20px; display: none; flex-direction: column; gap: 14px; border-top: 1px solid var(--border); }
+.lastframe-body.open { display: flex; }
+.lastframe-img-wrap { position: relative; width: 100px; height: 72px; flex-shrink: 0; }
+.lastframe-img-placeholder { width: 100px; height: 72px; border-radius: var(--radius-sm); border: 2px dashed var(--border2); background: var(--surface2); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; gap: 4px; }
+.lastframe-img-placeholder:hover { border-color: var(--accent); background: rgba(59,130,246,0.05); }
+.lastframe-img-preview { width: 100px; height: 72px; border-radius: var(--radius-sm); object-fit: cover; border: 2px solid var(--border2); display: none; cursor: pointer; }
+.lastframe-img-delete { position: absolute; top: -6px; left: -6px; width: 20px; height: 20px; background: var(--danger); border: 2px solid var(--surface); border-radius: 50%; color: #fff; font-size: 10px; font-weight: 700; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 10; transition: all 0.15s; }
+.lastframe-img-delete:hover { background: #c0392b; transform: scale(1.15); }
+
+/* GEN BAR */
+.gen-bar {
+  position: sticky; bottom: 16px; z-index: 50;
+  display: flex; gap: 10px; padding: 14px 20px;
+  background: rgba(5,6,8,0.92); border: 1px solid var(--border2);
+  border-radius: 14px; backdrop-filter: blur(16px);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,0.05); margin-top: 20px;
+}
+.btn-generate {
+  flex: 1; padding: 13px 24px;
+  background: linear-gradient(135deg, rgba(201,168,76,0.2), rgba(201,168,76,0.1));
+  border: 1px solid var(--gold-dim); border-radius: var(--radius);
+  color: var(--gold2); font-family: var(--font-display); font-size: 13px; letter-spacing: 1px;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-generate:hover { border-color: var(--gold2); box-shadow: 0 0 20px rgba(201,168,76,0.2); }
+.btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-stop {
+  flex: 1; padding: 13px 24px;
+  background: linear-gradient(135deg, rgba(239,68,68,0.18), rgba(239,68,68,0.08));
+  border: 1px solid rgba(239,68,68,0.5); border-radius: var(--radius);
+  color: #fca5a5; font-family: var(--font-display); font-size: 13px; letter-spacing: 1px;
+  cursor: pointer; transition: all 0.2s; display: none; align-items: center; justify-content: center; gap: 8px;
+}
+.btn-stop:hover { border-color: var(--danger); background: rgba(239,68,68,0.25); }
+.btn-stop.show { display: flex; }
+.btn-clear { padding: 12px 14px; background: transparent; border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text-muted); font-size: 12px; cursor: pointer; transition: all 0.15s; }
+.btn-clear:hover { border-color: var(--danger); color: var(--danger); background: rgba(239,68,68,0.05); }
+.btn-save { padding: 12px 14px; background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.3); border-radius: var(--radius); color: var(--gold2); font-size: 12px; font-family: var(--font-body); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.btn-save:hover { background: rgba(201,168,76,0.15); border-color: var(--gold); }
+.btn-load { padding: 12px 14px; background: transparent; border: 1px solid var(--border2); border-radius: var(--radius); color: var(--text-dim); font-size: 12px; font-family: var(--font-body); cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.btn-load:hover { border-color: var(--accent); color: var(--accent); background: rgba(59,130,246,0.05); }
+
+/* OUTPUT */
+.output-section { margin-top: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; display: none; }
+.output-section.show { display: block; }
+.output-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; border-bottom: 1px solid var(--border); background: linear-gradient(90deg, rgba(201,168,76,0.05), transparent); }
+.output-title { font-family: var(--font-display); font-size: 12px; color: var(--gold2); letter-spacing: 1px; flex: 1; }
+.btn-copy-out { padding: 6px 14px; background: rgba(201,168,76,0.1); border: 1px solid var(--gold-dim); border-radius: 999px; color: var(--gold2); font-size: 11px; font-family: var(--font-mono); cursor: pointer; transition: all 0.15s; }
+.btn-copy-out:hover { background: rgba(201,168,76,0.2); }
+.output-body { padding: 20px; font-family: var(--font-mono); font-size: 12px; color: #93c5fd; line-height: 1.8; white-space: pre-wrap; direction: ltr; text-align: left; max-height: 500px; overflow-y: auto; }
+
+/* ERROR / TOAST */
+.error-box { padding: 12px 16px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: var(--radius); font-size: 12px; color: #fca5a5; font-family: var(--font-mono); margin-top: 12px; display: none; }
+.error-box.show { display: block; }
+.toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--surface); border: 1px solid var(--border2); border-radius: 999px; padding: 10px 20px; font-size: 12px; font-family: var(--font-mono); color: var(--text); z-index: 9999; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: rgba(0,201,167,0.4); color: var(--teal); }
+.toast.error { border-color: rgba(239,68,68,0.4); color: #fca5a5; }
+
+/* LOC PROMPT */
+.loc-prompt-output { width: 100%; min-height: 90px; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-family: var(--font-mono); font-size: 11px; line-height: 1.7; padding: 10px 12px; resize: vertical; direction: ltr; text-align: left; }
+.loc-prompt-output::placeholder { color: var(--text-dim); }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-eyebrow">PROFESSIONAL TOOL</div>
+    <div class="header-title">✦ STORYBOARD PROMPT BUILDER ✦</div>
+    <div class="header-sub">بناء برومبت الستوري بورد الاحترافي — AI Video Generation</div>
+    <div class="header-line"></div>
+  </div>
+
+  <!-- 0. STORY INPUT -->
+  <div class="story-input-section">
+    <div class="story-input-header" onclick="toggleStorySection(this)">
+      <div class="section-icon">✍️</div>
+      <div>
+        <div class="section-title">STORY INPUT</div>
+        <div class="section-title-ar">أدخل قصتك — سيتم تعبئة النموذج تلقائياً</div>
+      </div>
+      <span class="section-chevron open" style="margin-right:auto;">▼</span>
+    </div>
+    <div class="story-input-body" id="story-input-body">
+      <div class="field">
+        <div class="field-label" style="font-size:12px;color:var(--gold2);font-family:var(--font-body);font-weight:700;letter-spacing:0;text-transform:none;">✍️ اكتب قصتك</div>
+        <textarea class="story-textarea" id="story-raw-input" placeholder="اكتب قصتك هنا بأي تفاصيل تريدها..."></textarea>
+      </div>
+      <button class="btn-rephrase" id="rephrase-btn" onclick="rephraseStory()">
+        <span>✦</span> صياغة احترافية للقصة
+      </button>
+      <div class="fill-loading" id="rephrase-loading">
+        <div class="fill-loading-ring"></div>
+        <span>⏳ جاري إعادة صياغة القصة...</span>
+      </div>
+      <div id="story-refined-wrap" style="display:none;" class="field">
+        <div class="field-label" style="font-size:12px;color:var(--gold2);font-family:var(--font-body);font-weight:700;letter-spacing:0;text-transform:none;display:flex;align-items:center;justify-content:space-between;">
+          <span>✦ القصة المصاغة</span>
+          <span style="font-size:10px;color:var(--text-dim);font-weight:400;">يمكنك التعديل عليها قبل تعبئة النموذج</span>
+        </div>
+        <textarea class="story-textarea" id="story-input" placeholder="ستظهر هنا القصة بعد الصياغة..." style="min-height:160px;border-color:var(--teal);"></textarea>
+      </div>
+      <div id="story-settings-wrap" style="display:none;" class="grid2">
+        <div class="field">
+          <div class="field-label"><span class="field-label-ar">عدد اللقطات</span><span class="sep">|</span>Shots</div>
+          <select id="shots-count">
+            <option value="" disabled selected>حدد عدد اللقطات</option>
+            <option value="3">3 لقطات</option><option value="4">4 لقطات</option><option value="5">5 لقطات</option>
+            <option value="6">6 لقطات</option><option value="7">7 لقطات</option><option value="8">8 لقطات</option>
+            <option value="9">9 لقطات</option><option value="10">10 لقطات</option><option value="12">12 لقطة</option><option value="15">15 لقطة</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-label"><span class="field-label-ar">المدة الكلية</span><span class="sep">|</span>Duration</div>
+          <select id="total-duration">
+            <option value="" disabled selected>حدد عدد الثواني</option>
+            <option value="5">5 ثوانٍ</option><option value="6">6 ثوانٍ</option><option value="7">7 ثوانٍ</option>
+            <option value="8">8 ثوانٍ</option><option value="9">9 ثوانٍ</option><option value="10">10 ثوانٍ</option>
+            <option value="11">11 ثانية</option><option value="12">12 ثانية</option><option value="13">13 ثانية</option>
+            <option value="14">14 ثانية</option><option value="15">15 ثانية</option>
+          </select>
+        </div>
+      </div>
+      <div class="fill-loading" id="fill-loading">
+        <div class="fill-loading-ring"></div>
+        <span id="fill-loading-text">⏳ يحلل القصة ويعبئ النموذج...</span>
+      </div>
+      <button class="btn-fill-form" id="fill-btn" onclick="fillFormFromStory()" style="display:none;">
+        <span>✦</span> قم بتعبئة النموذج — Auto Fill Form
+      </button>
+    </div>
+  </div>
+
+  <!-- 1. SCENE INFO -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon">🎬</div>
+      <div><div class="section-title">SCENE INFORMATION</div><div class="section-title-ar">معلومات المشهد</div></div>
+      <span class="section-chevron" style="margin-right:auto;">▼</span>
+    </div>
+    <div class="section-body collapsed">
+      <div class="field">
+        <div class="field-label"><span class="field-label-ar">عنوان المشهد</span><span class="sep">|</span>Scene Title</div>
+        <input type="text" id="scene-title" placeholder="اكتب عنوان المشهد هنا">
+      </div>
+      <div class="field">
+        <div class="field-label"><span class="field-label-ar">ملخص القصة</span><span class="sep">|</span>Story Summary</div>
+        <textarea id="story-summary" placeholder="اكتب ملخصاً موجزاً للمشهد"></textarea>
+      </div>
+      <div class="field">
+        <div class="field-label"><span class="field-label-ar">النوع</span><span class="sep">|</span>Genre</div>
+        <select id="genre-select">
+          <option value="" disabled selected>اختر نوع المشهد</option>
+          <option value="Science Fiction">Science Fiction — خيال علمي</option>
+          <option value="Adventure">Adventure — مغامرة</option>
+          <option value="Drama">Drama — دراما</option>
+          <option value="Romance">Romance — رومانسي</option>
+          <option value="Action">Action — أكشن</option>
+          <option value="Kids">Kids — أطفال</option>
+          <option value="Thriller">Thriller — إثارة</option>
+          <option value="Comedy">Comedy — كوميدي</option>
+          <option value="Horror">Horror — رعب</option>
+        </select>
+      </div>
+      <div class="grid3">
+        <div class="field">
+          <div class="field-label"><span class="field-label-ar">المدة</span><span class="sep">|</span>Duration</div>
+          <select id="duration">
+            <option value="" disabled selected>اختر المدة</option>
+            <option value="3 secs">3 secs</option><option value="4 secs">4 secs</option><option value="5 secs">5 secs</option>
+            <option value="6 secs">6 secs</option><option value="7 secs">7 secs</option><option value="8 secs">8 secs</option>
+            <option value="9 secs">9 secs</option><option value="10 secs">10 secs</option><option value="15 secs">15 secs</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-label"><span class="field-label-ar">البيئة</span><span class="sep">|</span>Environment</div>
+          <select id="env-type">
+            <option value="" disabled selected>اختر البيئة</option>
+            <option value="Indoor">Indoor — داخلي</option>
+            <option value="Outdoor">Outdoor — خارجي</option>
+          </select>
+        </div>
+        <div class="field">
+          <div class="field-label"><span class="field-label-ar">الوقت</span><span class="sep">|</span>Time</div>
+          <select id="time-of-day">
+            <option value="" disabled selected>اختر الوقت</option>
+            <option value="Day">Day — نهار</option><option value="Sunset">Sunset — غروب</option>
+            <option value="Night">Night — ليل</option><option value="Dawn">Dawn — فجر</option><option value="Sunrise">Sunrise — شروق</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <div class="style-field-row">
+          <div class="field-label"><span class="field-label-ar">الاستايل البصري</span><span class="sep">|</span>Visual Style</div>
+          <select id="style-select" style="display:none;"></select>
+          <div class="style-selected-box" id="style-selected-box" onclick="openStyleModal()">
+            <div class="style-add-icon">＋</div>
+            <div class="style-add-label">اختر الاستايل البصري</div>
+          </div>
+        </div>
+        <div class="custom-style-wrap" id="custom-style-wrap">
+          <input type="text" id="custom-style-input" placeholder="اكتب الاستايل البصري المخصص...">
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label"><span class="field-label-ar">الموقع</span><span class="sep">|</span>Location</div>
+        <input type="text" id="location" placeholder="مثال: مول فاخر، صحراء، ميناء، غرفة نوم...">
+      </div>
+      <!-- Location Prompt -->
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+        <div style="font-size:10px;font-family:var(--font-mono);color:var(--gold2);letter-spacing:1px;text-transform:uppercase;">✦ Location Reference Prompt</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-gen-char-prompt" id="loc-gen-prompt-btn" onclick="generateLocationPrompt()">⚡ توليد برومبت الموقع</button>
+          <button class="btn-copy-char-prompt" id="loc-copy-prompt-btn" onclick="copyLocPrompt()" style="display:none;">⎘ نسخ</button>
+          <span id="loc-prompt-status" style="font-size:10px;font-family:var(--font-mono);color:var(--text-dim);"></span>
+        </div>
+        <textarea class="loc-prompt-output" id="loc-prompt-output" placeholder="سيظهر برومبت مرجع الموقع هنا..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. CHARACTERS -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon">👤</div>
+      <div><div class="section-title">CHARACTERS</div><div class="section-title-ar">شخصيات المشهد</div></div>
+      <span class="section-chevron" style="margin-right:auto;">▼</span>
+    </div>
+    <div class="section-body collapsed">
+      <div class="chars-container" id="chars-container"></div>
+      <button class="btn-add-char" onclick="addChar()">＋ إضافة شخصية — Add Character</button>
+    </div>
+  </div>
+
+  <!-- 3. SHOTS -->
+  <div class="section">
+    <div class="section-header" onclick="toggleSection(this)">
+      <div class="section-icon">🎥</div>
+      <div><div class="section-title">SHOTS</div><div class="section-title-ar">اللقطات</div></div>
+      <span class="section-chevron" style="margin-right:auto;">▼</span>
+    </div>
+    <div class="section-body collapsed">
+      <div class="shots-container" id="shots-container"></div>
+      <button class="btn-add-shot" onclick="addShot()">＋ إضافة لقطة — Add Shot</button>
+    </div>
+  </div>
+
+  <div class="error-box" id="error-box"></div>
+
+  <!-- LAST FRAME -->
+  <div class="lastframe-section">
+    <div class="lastframe-toggle-bar" onclick="toggleLastFrame()">
+      <div class="section-icon">🎞️</div>
+      <div style="flex:1;">
+        <div class="section-title" style="font-size:12px;">LAST FRAME REFERENCE</div>
+        <div class="section-title-ar" style="font-size:12px;">كادر نهاية الفيديو السابق — اختياري</div>
+      </div>
+      <span class="lastframe-badge">اختياري</span>
+      <button class="shot-collapse-btn" id="lastframe-arrow">▼</button>
+    </div>
+    <div class="lastframe-body" id="lastframe-body">
+      <p style="font-size:12px;color:var(--text-dim);margin:0;">ارفع صورة آخر كادر من الفيديو السابق</p>
+      <div style="display:flex;gap:16px;align-items:flex-start;">
+        <div class="lastframe-img-wrap">
+          <input type="file" id="lf-img-input" accept="image/*" style="display:none;" onchange="handleLFImage(event)">
+          <img id="lf-img-preview" class="lastframe-img-preview" alt="Last Frame">
+          <div id="lf-img-placeholder" class="lastframe-img-placeholder" onclick="document.getElementById('lf-img-input').click()">
+            <span style="font-size:20px;">🖼️</span>
+            <span style="font-size:9px;color:var(--text-muted);font-family:var(--font-mono);text-align:center;">رفع صورة</span>
+          </div>
+          <div class="lastframe-img-delete" id="lf-img-delete" onclick="clearLastFrame()">✕</div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:10px;">
+          <div class="grid2">
+            <div class="field">
+              <div class="field-label"><span class="field-label-ar">الرمز المرجعي</span><span class="sep">|</span>Ref Tag</div>
+              <input type="text" id="lf-ref" value="@img5" style="font-family:var(--font-mono);color:var(--gold2);">
+            </div>
+            <div style="display:flex;align-items:flex-end;gap:8px;">
+              <button class="btn-analyze-img" id="lf-analyze-btn" onclick="analyzeLastFrame()" disabled>✦ تحليل الصورة</button>
+              <div class="char-analyzing" id="lf-analyzing"><div class="char-analyzing-ring"></div><span>يحلل...</span></div>
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span class="field-label-ar">وصف الكادر الأخير</span><span class="sep">|</span>Description</div>
+            <textarea id="lf-desc" placeholder="وصف آخر كادر..." style="min-height:56px;"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="load-file-input" accept=".json" style="display:none;" onchange="loadFromFile(event)">
+
+  <!-- GEN BAR -->
+  <div class="gen-bar">
+    <button class="btn-generate" id="gen-btn" onclick="generate()">✦ Generate Prompt — توليد البرومبت</button>
+    <button class="btn-stop" id="stop-btn" onclick="stopGenerate()">⊗ إيقاف</button>
+    <button class="btn-save" onclick="saveToFile()">💾 حفظ</button>
+    <button class="btn-load" onclick="document.getElementById('load-file-input').click()">📂 تحميل</button>
+    <button class="btn-clear" onclick="clearAll()">⊘ مسح</button>
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="output-section" id="output-section">
+    <div class="output-header">
+      <div class="output-title">✦ GENERATED PROMPT</div>
+      <button class="btn-copy-out" id="copy-output-btn" onclick="copyOutput()">⊕ نسخ</button>
+      <button class="btn-copy-out" onclick="clearOutput()" style="border-color:rgba(239,68,68,0.35);color:#fca5a5;">⊗ مسح</button>
+    </div>
+    <div class="output-body" id="output-body"></div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<div class="toast" id="toast"></div>
+
+<!-- STYLE MODAL -->
+<div class="modal-overlay" id="style-modal-overlay" onclick="if(event.target===this)closeStyleModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">VISUAL STYLE — الاستايل البصري</span>
+      <button class="modal-close" onclick="closeStyleModal()">✕</button>
+    </div>
+    <div class="modal-body" id="style-modal-body"></div>
+  </div>
+</div>
+
+<!-- CAM POS MODAL -->
+<div class="modal-overlay" id="cam-pos-modal-overlay" onclick="if(event.target===this)closeCamPosModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">CAMERA POSITION — موقع الكاميرا</span>
+      <button class="modal-close" onclick="closeCamPosModal()">✕</button>
+    </div>
+    <div class="modal-body" id="cam-pos-modal-body"></div>
+  </div>
+</div>
+
+<!-- SHOT SIZE MODAL -->
+<div class="modal-overlay" id="shot-size-modal-overlay" onclick="if(event.target===this)closeShotSizeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">SHOT SIZE — حجم اللقطة</span>
+      <button class="modal-close" onclick="closeShotSizeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="shot-size-modal-body"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+let charCount = 0, shotCount = 0;
+let generateAborted = false, generateActive = false;
+const charImages = {};
+
+const STYLE_OPTIONS = [
+  { value: 'coloring-book',       en: 'sketch drawing',         ar: 'رسم سكتش',  emoji: '✏️', img: 'https://i.postimg.cc/zfW8N6MF/sketchdrawing.png' },
+  { value: 'craftmotion',         en: 'Craftmotion 3D',         ar: 'ثري دي صلصال', emoji: '🏺', img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80' },
+  { value: 'fantasy',             en: 'Fantasy',                ar: 'خيالي', emoji: '🧙',       img: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=400&q=80' },
+  { value: 'photorealistic',       en: 'Photorealistic',         ar: 'التصوير الفوتوغرافي', emoji: '📷',  img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=80' },
+  { value: 'inkprint',            en: 'Inkprint',               ar: 'حبر أسود', emoji: '🖋️',   img: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&q=80' },
+  { value: 'plasticinepeople',    en: 'Plasticine People',      ar: 'الصلصال', emoji: '🧸',     img: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80' },
+  { value: 'darkneoclassical',    en: 'Dark Neoclassical',      ar: 'كلاسيكي داكن', emoji: '🎨', img: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&q=80' },
+  { value: 'cartoonfun',          en: 'Cartoon Fun',            ar: 'كرتون مرح', emoji: '😄',   img: 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?w=400&q=80' },
+  { value: 'boldflat',            en: 'Bold Flat',              ar: 'مسطح جريء', emoji: '🔷',   img: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&q=80' },
+  { value: 'mockup',              en: 'Mockup',                 ar: 'موكب', emoji: '📱',         img: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&q=80' },
+  { value: 'Cinematic Realism',   en: 'Cinematic Realism',      ar: 'واقعي سينمائي', emoji: '🎞️', img: 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&q=80' },
+  { value: 'Anime',               en: 'Anime',                  ar: 'أنيمي', emoji: '⛩️',       img: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&q=80' },
+  { value: 'Futuristic',          en: 'Futuristic',             ar: 'مستقبلي', emoji: '🚀',      img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80' },
+  { value: 'custom',              en: '✏️ Custom Style',        ar: 'ستايل مخصص', emoji: '✏️',  img: null },
+];
+
+const SHOT_SIZE_OPTIONS = [
+  { value: 'Extra Wide',   en: 'Extra Wide',   emoji: '🌅' },
+  { value: 'Wide',         en: 'Wide',         emoji: '🖼️' },
+  { value: 'Wide Scene',   en: 'Wide Scene',   emoji: '🎬' },
+  { value: 'Medium Wide',  en: 'Medium Wide',  emoji: '📸' },
+  { value: 'Medium',       en: 'Medium',       emoji: '🎯' },
+  { value: 'Close-up',     en: 'Close-up',     emoji: '🔍' },
+  { value: 'Macro',        en: 'Macro',        emoji: '🔬' },
+];
+
+const CAM_POS_OPTIONS = [
+  { value: 'Aerial Camera',           en: 'Aerial Camera',          emoji: '✈️' },
+  { value: 'Drone Shot',              en: 'Drone Shot',             emoji: '🛸' },
+  { value: 'Overhead Shot',           en: 'Overhead Shot',          emoji: '⬆️' },
+  { value: 'Ground-Level Shot',       en: 'Ground-Level Shot',      emoji: '⬇️' },
+  { value: 'High-angle shot',         en: 'High-angle shot',        emoji: '📐' },
+  { value: 'Low-angle shot',          en: 'Low-angle shot',         emoji: '📏' },
+  { value: 'Medium shot (eye-level)', en: 'Medium shot (eye-level)',emoji: '👁️' },
+  { value: 'Dutch angle shot',        en: 'Dutch angle shot',       emoji: '🔄' },
+  { value: 'Eye-level shot',          en: 'Eye-level shot',         emoji: '👀' },
+  { value: 'Sitting-level shot',      en: 'Sitting-level shot',     emoji: '🪑' },
+  { value: 'Knee-level shot',         en: 'Knee-level shot',        emoji: '🦵' },
+];
+
+/* ═══════════════════════════════════════
+   SECTION TOGGLE
+═══════════════════════════════════════ */
+function toggleSection(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector('.section-chevron');
+  const isOpen = !body.classList.contains('collapsed');
+  body.classList.toggle('collapsed', isOpen);
+  if (chevron) chevron.classList.toggle('open', !isOpen);
+}
+function toggleStorySection(header) {
+  const body = document.getElementById('story-input-body');
+  const chevron = header.querySelector('.section-chevron');
+  body.classList.toggle('hidden');
+  if (chevron) chevron.classList.toggle('open');
+}
+
+/* ═══════════════════════════════════════
+   STYLE MODAL
+═══════════════════════════════════════ */
+function initStyleModal() {
+  const body = document.getElementById('style-modal-body');
+  if (!body) return;
+  body.innerHTML = '';
+  STYLE_OPTIONS.forEach(opt => {
+    const card = document.createElement('div');
+    card.className = 'style-card';
+    card.dataset.value = opt.value;
+    const imgHtml = opt.img
+      ? `<div class="style-card-img-wrap"><img src="${opt.img}" alt="${opt.en}" class="style-card-img" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'style-card-no-img\\'>${opt.emoji}</div>'"><div class="style-card-img-overlay"><span class="style-card-emoji">${opt.emoji}</span></div></div>`
+      : `<div class="style-card-no-img">${opt.emoji}</div>`;
+    card.innerHTML = `${imgHtml}<div class="style-card-label"><span class="style-card-en">${opt.en}</span><span class="style-card-ar">${opt.ar}</span></div>`;
+    card.addEventListener('click', () => selectStyle(opt));
+    body.appendChild(card);
+  });
+}
+function openStyleModal() {
+  initStyleModal();
+  document.getElementById('style-modal-overlay').classList.add('open');
+}
+function closeStyleModal() {
+  document.getElementById('style-modal-overlay').classList.remove('open');
+}
+function selectStyle(opt) {
+  document.getElementById('style-select').value = opt.value;
+  const box = document.getElementById('style-selected-box');
+  box.classList.add('has-selection');
+  if (opt.img) {
+    box.innerHTML = `<img src="${opt.img}" alt="${opt.en}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;border-radius:calc(var(--radius) - 2px);display:block;" onerror="this.style.display='none'"><div class="style-box-overlay"><span class="style-box-name">${opt.emoji||''} ${opt.en}</span><span class="style-box-change" onclick="event.stopPropagation();openStyleModal()">تغيير</span></div>`;
+  } else {
+    box.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="font-size:22px;">${opt.emoji}</div><div style="font-size:9px;color:var(--gold2);font-family:var(--font-display);letter-spacing:0.5px;text-align:center;padding:0 4px;">${opt.en}</div></div><div class="style-box-overlay"><span class="style-box-name"></span><span class="style-box-change" onclick="event.stopPropagation();openStyleModal()">تغيير</span></div>`;
+  }
+  const customWrap = document.getElementById('custom-style-wrap');
+  if (opt.value === 'custom') customWrap.classList.add('show');
+  else customWrap.classList.remove('show');
+  closeStyleModal();
+}
+
+/* ═══════════════════════════════════════
+   SHOT SIZE MODAL
+═══════════════════════════════════════ */
+let shotSizeActiveId = null;
+function initShotSizeModal() {
+  const body = document.getElementById('shot-size-modal-body');
+  if (!body || body.hasChildNodes()) return;
+  SHOT_SIZE_OPTIONS.forEach(opt => {
+    const card = document.createElement('div');
+    card.className = 'style-card';
+    card.dataset.value = opt.value;
+    card.innerHTML = `<div class="style-card-no-img">${opt.emoji}</div><div class="style-card-label"><span class="style-card-en">${opt.en}</span></div>`;
+    card.addEventListener('click', () => selectShotSize(opt));
+    body.appendChild(card);
+  });
+}
+function openShotSizeModal(id) {
+  shotSizeActiveId = id;
+  initShotSizeModal();
+  document.getElementById('shot-size-modal-overlay').classList.add('open');
+}
+function closeShotSizeModal() {
+  document.getElementById('shot-size-modal-overlay').classList.remove('open');
+  shotSizeActiveId = null;
+}
+function selectShotSize(opt, forceId) {
+  const id = forceId !== undefined ? forceId : shotSizeActiveId;
+  if (id === null || id === undefined) return;
+  const el = document.getElementById(`s${id}-size`);
+  if (el) el.value = opt.value;
+  const box = document.getElementById(`s${id}-size-box`);
+  if (box) {
+    box.classList.add('has-selection');
+    box.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="font-size:28px;">${opt.emoji}</div><div style="font-size:11px;color:var(--gold2);font-family:var(--font-display);letter-spacing:1px;text-align:center;padding:0 8px;">${opt.en}</div></div><div style="position:absolute;bottom:8px;right:12px;"><span class="style-box-change" onclick="openShotSizeModal(${id})">تغيير</span></div>`;
+  }
+  if (forceId === undefined) closeShotSizeModal();
+}
+
+/* ═══════════════════════════════════════
+   CAM POS MODAL
+═══════════════════════════════════════ */
+let camPosActiveId = null;
+function initCamPosModal() {
+  const body = document.getElementById('cam-pos-modal-body');
+  if (!body || body.hasChildNodes()) return;
+  CAM_POS_OPTIONS.forEach(opt => {
+    const card = document.createElement('div');
+    card.className = 'style-card';
+    card.dataset.value = opt.value;
+    card.innerHTML = `<div class="style-card-no-img">${opt.emoji}</div><div class="style-card-label"><span class="style-card-en">${opt.en}</span></div>`;
+    card.addEventListener('click', () => selectCamPos(opt));
+    body.appendChild(card);
+  });
+}
+function openCamPosModal(id) {
+  camPosActiveId = id;
+  initCamPosModal();
+  document.getElementById('cam-pos-modal-overlay').classList.add('open');
+}
+function closeCamPosModal() {
+  document.getElementById('cam-pos-modal-overlay').classList.remove('open');
+  camPosActiveId = null;
+}
+function selectCamPos(opt, forceId) {
+  const id = forceId !== undefined ? forceId : camPosActiveId;
+  if (id === null || id === undefined) return;
+  const el = document.getElementById(`s${id}-campos`);
+  if (el) el.value = opt.value;
+  const box = document.getElementById(`s${id}-campos-box`);
+  if (box) {
+    box.classList.add('has-selection');
+    box.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="font-size:28px;">${opt.emoji}</div><div style="font-size:11px;color:var(--gold2);font-family:var(--font-display);letter-spacing:1px;text-align:center;padding:0 8px;">${opt.en}</div></div><div style="position:absolute;bottom:8px;right:12px;"><span class="style-box-change" onclick="openCamPosModal(${id})">تغيير</span></div>`;
+  }
+  if (forceId === undefined) closeCamPosModal();
+}
+
+/* ═══════════════════════════════════════
+   CHARACTERS
+═══════════════════════════════════════ */
+function addChar() {
+  charCount++;
+  const id = charCount;
+
+  const div = document.createElement('div');
+  div.className = 'char-card';
+  div.id = `char-${id}`;
+  div.innerHTML = `
+    <div class="char-header" id="c${id}-header">
+      <div class="char-num">${id}</div>
+      <div class="char-title">Character ${id} / شخصية ${id}</div>
+      <button class="char-collapse-btn open" id="c${id}-collapse-btn">▼</button>
+      <button class="char-remove" onclick="event.stopPropagation();removeChar(${id})">✕</button>
+    </div>
+    <div class="char-body" id="c${id}-body">
+      <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;">
+        <div id="c${id}-img-slot"></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:10px;">
+          <div class="grid3">
+            <div class="field">
+              <div class="field-label"><span class="field-label-ar">الاسم</span><span class="sep">|</span>Name</div>
+              <input type="text" id="c${id}-name" placeholder="اسم الشخصية" oninput="updateCharSelects()">
+            </div>
+            <div class="field">
+              <div class="field-label"><span class="field-label-ar">المرجع</span><span class="sep">|</span>Ref Tag</div>
+              <input type="text" id="c${id}-ref" value="@img${id}" style="font-family:var(--font-mono);color:var(--gold2);">
+            </div>
+            <div class="field">
+              <div class="field-label"><span class="field-label-ar">العمر</span><span class="sep">|</span>Age</div>
+              <input type="text" id="c${id}-age" placeholder="العمر">
+            </div>
+          </div>
+          <div class="field">
+            <div class="field-label"><span class="field-label-ar">الدور</span><span class="sep">|</span>Role</div>
+            <input type="text" id="c${id}-role" placeholder="البطل / المعلم...">
+          </div>
+          <div id="c${id}-btn-slot"></div>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label"><span class="field-label-ar">الوصف</span><span class="sep">|</span>Description</div>
+        <textarea id="c${id}-desc" placeholder="وصف الشخصية، ملابسها، مظهرها... أو ارفع صورة للتحليل التلقائي"></textarea>
+      </div>
+      <div class="char-prompt-box">
+        <div class="char-prompt-label">✦ Character Reference Prompt</div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="btn-gen-char-prompt" id="c${id}-gen-prompt-btn" onclick="generateCharPrompt(${id})">⚡ توليد برومبت الشخصية</button>
+          <button class="btn-copy-char-prompt" id="c${id}-copy-prompt-btn" onclick="copyCharPrompt(${id})" style="display:none;">⎘ نسخ</button>
+          <span id="c${id}-prompt-status" style="font-size:10px;font-family:var(--font-mono);color:var(--text-dim);"></span>
+        </div>
+        <textarea class="char-prompt-output" id="c${id}-prompt-output" placeholder="سيظهر برومبت مرجع الشخصية هنا..."></textarea>
+      </div>
+    </div>`;
+
+  document.getElementById('chars-container').appendChild(div);
+
+  // Build image slot
+  const imgInput = document.createElement('input');
+  imgInput.type = 'file'; imgInput.className = 'char-img-input';
+  imgInput.id = `c${id}-img-input`; imgInput.accept = 'image/*';
+  imgInput.addEventListener('change', e => handleCharImage(id, e));
+
+  const imgPreview = document.createElement('img');
+  imgPreview.className = 'char-img-preview'; imgPreview.id = `c${id}-img-preview`;
+  imgPreview.addEventListener('click', () => imgInput.click());
+
+  const placeholder = document.createElement('div');
+  placeholder.className = 'char-img-placeholder'; placeholder.id = `c${id}-img-placeholder`;
+  placeholder.innerHTML = '<span class="char-img-placeholder-icon">🖼️</span><span class="char-img-placeholder-text">رفع صورة<br>Upload</span>';
+  placeholder.addEventListener('click', () => imgInput.click());
+
+  const delBtn = document.createElement('div');
+  delBtn.className = 'char-img-delete';
+  delBtn.textContent = '✕';
+  delBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    charImages[id] = null;
+    imgPreview.src = ''; imgPreview.style.display = 'none';
+    placeholder.style.display = 'flex'; delBtn.style.display = 'none';
+    analyzeBtn.disabled = true; imgInput.value = '';
+    const d = document.getElementById(`c${id}-desc`);
+    if (d) d.value = '';
+  });
+
+  const imgWrap = document.createElement('div');
+  imgWrap.className = 'char-img-wrap';
+  imgWrap.appendChild(imgInput); imgWrap.appendChild(imgPreview);
+  imgWrap.appendChild(placeholder); imgWrap.appendChild(delBtn);
+
+  const analyzeBtn = document.createElement('button');
+  analyzeBtn.className = 'btn-analyze-img'; analyzeBtn.disabled = true;
+  analyzeBtn.innerHTML = '✦ تحليل الصورة';
+  analyzeBtn.addEventListener('click', () => analyzeCharImage(id));
+
+  const analyzingDiv = document.createElement('div');
+  analyzingDiv.className = 'char-analyzing'; analyzingDiv.id = `c${id}-analyzing`;
+  analyzingDiv.innerHTML = '<div class="char-analyzing-ring"></div><span>يحلل...</span>';
+
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;align-items:center;gap:8px;';
+  btnRow.appendChild(analyzeBtn); btnRow.appendChild(analyzingDiv);
+
+  document.getElementById(`c${id}-img-slot`).appendChild(imgWrap);
+  document.getElementById(`c${id}-btn-slot`).appendChild(btnRow);
+
+  document.getElementById(`c${id}-header`).addEventListener('click', () => toggleChar(id));
+  updateCharSelects();
+}
+
+function removeChar(id) {
+  document.getElementById(`char-${id}`)?.remove();
+  updateCharSelects();
+}
+
+function toggleChar(id) {
+  const body = document.getElementById(`c${id}-body`);
+  const btn = document.getElementById(`c${id}-collapse-btn`);
+  if (body) body.classList.toggle('collapsed');
+  if (btn) btn.classList.toggle('open');
+}
+
+function updateCharSelects() {
+  const names = [];
+  document.querySelectorAll('[id^="c"][id$="-name"]').forEach(el => {
+    const n = el.value.trim();
+    if (n) names.push(n);
+  });
+  document.querySelectorAll('.shot-chars-select').forEach(sel => {
+    const prev = [...sel.selectedOptions].map(o => o.value);
+    sel.innerHTML = names.map(c => `<option value="${c}" ${prev.includes(c)?'selected':''}>${c}</option>`).join('');
+  });
+}
+
+function getCharacters() {
+  const chars = [];
+  document.querySelectorAll('.char-card').forEach(card => {
+    const id = card.id.replace('char-','');
+    const name = document.getElementById(`c${id}-name`)?.value.trim();
+    const ref  = document.getElementById(`c${id}-ref`)?.value.trim() || '';
+    const age  = document.getElementById(`c${id}-age`)?.value.trim();
+    const role = document.getElementById(`c${id}-role`)?.value.trim();
+    const desc = document.getElementById(`c${id}-desc`)?.value.trim();
+    if (name) chars.push({ name, ref, age, role, desc });
+  });
+  return chars;
+}
+
+/* ═══════════════════════════════════════
+   SHOTS
+═══════════════════════════════════════ */
+function addShot() {
+  shotCount++;
+  const id = shotCount;
+  const div = document.createElement('div');
+  div.className = 'shot-card'; div.id = `shot-${id}`;
+  div.innerHTML = `
+    <div class="shot-header" onclick="toggleShot(${id})">
+      <div class="shot-num">${id}</div>
+      <div class="shot-name-preview" id="s${id}-preview">Shot ${id}</div>
+      <button class="shot-remove" onclick="event.stopPropagation();removeShot(${id})">✕</button>
+      <button class="shot-collapse-btn open" id="s${id}-collapse">▼</button>
+    </div>
+    <div class="shot-body" id="s${id}-body">
+      <div class="grid2">
+        <div class="field">
+          <div class="field-label"><span class="field-label-ar">اسم اللقطة</span><span class="sep">|</span>Shot Name</div>
+          <input type="text" id="s${id}-name" placeholder="اسم اللقطة..." oninput="updateShotPreview(${id})">
+        </div>
+        <div class="field">
+          <div class="field-label"><span class="field-label-ar">مدة اللقطة</span><span class="sep">|</span>Duration</div>
+          <select id="s${id}-dur">
+            <option value="3 secs">3 secs</option><option value="4 secs">4 secs</option>
+            <option value="5 secs" selected>5 secs</option><option value="6 secs">6 secs</option>
+            <option value="7 secs">7 secs</option><option value="8 secs">8 secs</option>
+            <option value="9 secs">9 secs</option><option value="10 secs">10 secs</option>
+          </select>
+        </div>
+      </div>
+      <div class="shot-size-campos-row">
+        <div class="field">
+          <div class="field-label"><span class="field-label-ar">حجم اللقطة</span><span class="sep">|</span>Shot Size</div>
+          <input type="hidden" id="s${id}-size" value="">
+          <div class="shot-size-box" id="s${id}-size-box" onclick="openShotSizeModal(${id})">
+            <div class="style-add-icon">＋</div><div class="style-add-label">حجم اللقطة</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span class="field-label-ar">موقع الكاميرا</span><span class="sep">|</span>Camera Position</div>
+          <input type="hidden" id="s${id}-campos" value="">
+          <div class="cam-pos-selected-box" id="s${id}-campos-box" onclick="openCamPosModal(${id})">
+            <div class="style-add-icon">＋</div><div class="style-add-label">موقع الكاميرا</div>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label"><span class="field-label-ar">حركة الكاميرا</span><span class="sep">|</span>Camera Style</div>
+        <select id="s${id}-cam">
+          <option value="Gradual Close-up" selected>Gradual Close-up — تقريب تدريجي</option>
+          <option value="Zoom In">Zoom In — تكبير</option>
+          <option value="Pull Back">Pull Back — سحب للخلف</option>
+          <option value="Horizontal Scan">Horizontal Scan — مسح أفقي</option>
+          <option value="Handheld">Handheld — يد حرة</option>
+          <option value="Steady">Steady — ثابت</option>
+          <option value="Rotate">Rotate — دوران</option>
+          <option value="Lift Up">Lift Up — رفع للأعلى</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label"><span class="field-label-ar">مزاج اللقطة</span><span class="sep">|</span>Shot Mood</div>
+        <select id="s${id}-mood">
+          <option value="Luxury">Luxury — فاخر</option>
+          <option value="Optimistic">Optimistic — متفائل</option>
+          <option value="Energetic">Energetic — نشيط</option>
+          <option value="Warm" selected>Warm — دافئ</option>
+          <option value="Mysterious">Mysterious — غامض</option>
+          <option value="Playful">Playful — مرح</option>
+          <option value="Romantic">Romantic — رومانسي</option>
+          <option value="Melancholy">Melancholy — حزين</option>
+          <option value="Epic">Epic — ملحمي</option>
+          <option value="Dark">Dark — داكن</option>
+          <option value="Calm">Calm — هادئ</option>
+          <option value="Nostalgic">Nostalgic — حنين</option>
+        </select>
+      </div>
+      <div class="field">
+        <div class="field-label"><span class="field-label-ar">شخصيات اللقطة</span><span class="sep">|</span>Shot Characters</div>
+        <select id="s${id}-chars" class="shot-chars-select" multiple style="min-height:54px;"></select>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:4px;font-family:var(--font-mono);">Ctrl+Click لتحديد أكثر من شخصية</div>
+      </div>
+      <div class="field">
+        <div class="field-label"><span class="field-label-ar">وصف اللقطة</span><span class="sep">|</span>Shot Description</div>
+        <textarea id="s${id}-desc" placeholder="صف ما يحدث في هذه اللقطة..."></textarea>
+      </div>
+      <div class="field">
+        <div class="field-label"><span class="field-label-ar">ما تريد تجنبه</span><span class="sep">|</span>Negative Prompt</div>
+        <input type="text" id="s${id}-neg" placeholder="blur, distorted faces, low quality...">
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="sound-row"><div class="sound-label">🔊 Sound</div><div class="toggle-group"><button class="toggle-btn yes active" onclick="toggleSound(this,'yes')">Yes</button><button class="toggle-btn no" onclick="toggleSound(this,'no')">No</button></div></div>
+        <div class="sound-row"><div class="sound-label">🎵 Music</div><div class="toggle-group"><button class="toggle-btn yes active" onclick="toggleSound(this,'yes')">Yes</button><button class="toggle-btn no" onclick="toggleSound(this,'no')">No</button></div></div>
+        <div class="sound-row"><div class="sound-label">🎧 Sound Effects</div><div class="toggle-group"><button class="toggle-btn yes active" onclick="toggleSound(this,'yes')">Yes</button><button class="toggle-btn no" onclick="toggleSound(this,'no')">No</button></div></div>
+      </div>
+    </div>`;
+  document.getElementById('shots-container').appendChild(div);
+  updateCharSelects();
+}
+
+function removeShot(id) { document.getElementById(`shot-${id}`)?.remove(); }
+function toggleShot(id) {
+  const body = document.getElementById(`s${id}-body`);
+  const btn = document.getElementById(`s${id}-collapse`);
+  if (body) body.classList.toggle('collapsed');
+  if (btn) btn.classList.toggle('open');
+}
+function updateShotPreview(id) {
+  const name = document.getElementById(`s${id}-name`)?.value.trim();
+  const prev = document.getElementById(`s${id}-preview`);
+  if (prev) prev.textContent = name || `Shot ${id}`;
+}
+function toggleSound(btn, val) {
+  btn.closest('.toggle-group').querySelectorAll('.toggle-btn').forEach(b => { b.classList.remove('active','yes','no'); });
+  btn.classList.add('active', val);
+}
+function getShots() {
+  return [...document.querySelectorAll('.shot-card')].map(card => {
+    const id = card.id.replace('shot-','');
+    const soundRows = card.querySelectorAll('.sound-row');
+    return {
+      id, name: document.getElementById(`s${id}-name`)?.value.trim() || `Shot ${id}`,
+      dur: document.getElementById(`s${id}-dur`)?.value || '',
+      size: document.getElementById(`s${id}-size`)?.value || '',
+      camStyle: document.getElementById(`s${id}-cam`)?.value || '',
+      camPos: document.getElementById(`s${id}-campos`)?.value || '',
+      mood: document.getElementById(`s${id}-mood`)?.value || '',
+      chars: [...(document.getElementById(`s${id}-chars`)?.selectedOptions||[])].map(o=>o.value).join(', '),
+      desc: document.getElementById(`s${id}-desc`)?.value.trim() || '',
+      neg: document.getElementById(`s${id}-neg`)?.value.trim() || '',
+      sound: soundRows[0]?.querySelector('.toggle-btn.active')?.textContent || 'Yes',
+      music: soundRows[1]?.querySelector('.toggle-btn.active')?.textContent || 'Yes',
+      sfx:   soundRows[2]?.querySelector('.toggle-btn.active')?.textContent || 'Yes',
+    };
+  });
+}
+
+/* ═══════════════════════════════════════
+   LAST FRAME
+═══════════════════════════════════════ */
+function toggleLastFrame() {
+  const body = document.getElementById('lastframe-body');
+  const arrow = document.getElementById('lastframe-arrow');
+  body.classList.toggle('open');
+  if (arrow) arrow.classList.toggle('open');
+}
+function handleLFImage(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const preview = document.getElementById('lf-img-preview');
+    const ph = document.getElementById('lf-img-placeholder');
+    const del = document.getElementById('lf-img-delete');
+    const analyzeBtn = document.getElementById('lf-analyze-btn');
+    preview.src = ev.target.result; preview.style.display = 'block';
+    ph.style.display = 'none'; del.style.display = 'flex';
+    analyzeBtn.disabled = false;
+    window._lfImageData = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function clearLastFrame() {
+  document.getElementById('lf-img-preview').src = '';
+  document.getElementById('lf-img-preview').style.display = 'none';
+  document.getElementById('lf-img-placeholder').style.display = 'flex';
+  document.getElementById('lf-img-delete').style.display = 'none';
+  document.getElementById('lf-analyze-btn').disabled = true;
+  document.getElementById('lf-img-input').value = '';
+  window._lfImageData = null;
+}
+async function analyzeLastFrame() {
+  const dataUrl = window._lfImageData;
+  if (!dataUrl) return;
+  const btn = document.getElementById('lf-analyze-btn');
+  const analyzing = document.getElementById('lf-analyzing');
+  btn.disabled = true; analyzing.classList.add('show');
+  const [meta, b64] = dataUrl.split(',');
+  const mt = meta.match(/:(.+?);/)?.[1] || 'image/jpeg';
+  try {
+    const res = await callAPI({
+      system: 'Describe this image in detail in Arabic for use as a last-frame reference in an AI video storyboard. 2-3 sentences max.',
+      userContent: [
+        { type: 'image', source: { type: 'base64', media_type: mt, data: b64 } },
+        { type: 'text', text: 'صف هذه الصورة كآخر كادر من فيديو سابق.' }
+      ]
+    });
+    document.getElementById('lf-desc').value = res;
+    showToast('✓ تم تحليل الكادر الأخير', 'success');
+  } catch(e) { showToast('⚠️ ' + e.message, 'error'); }
+  finally { btn.disabled = false; analyzing.classList.remove('show'); }
+}
+function getLastFrameData() {
+  const desc = document.getElementById('lf-desc')?.value.trim();
+  const ref = document.getElementById('lf-ref')?.value.trim() || '@img5';
+  if (!desc) return null;
+  return { desc, ref };
+}
+
+/* ═══════════════════════════════════════
+   CHARACTER IMAGE ANALYSIS
+═══════════════════════════════════════ */
+function handleCharImage(id, e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const dataUrl = ev.target.result;
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 1024;
+      let w = img.width, h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(img, 0, 0, w, h);
+      charImages[id] = c.toDataURL('image/jpeg', 0.82);
+      applyCharImage(id, charImages[id]);
+    };
+    img.onerror = () => { charImages[id] = dataUrl; applyCharImage(id, dataUrl); };
+    img.src = dataUrl;
+  };
+  reader.readAsDataURL(file);
+}
+function applyCharImage(id, base64) {
+  const preview = document.getElementById(`c${id}-img-preview`);
+  const ph = document.getElementById(`c${id}-img-placeholder`);
+  const wrap = preview?.closest('.char-img-wrap');
+  const del = wrap?.querySelector('.char-img-delete');
+  if (preview) { preview.src = base64; preview.style.display = 'block'; }
+  if (ph) ph.style.display = 'none';
+  if (del) del.style.display = 'flex';
+  // find analyze btn via the btn-slot sibling
+  const btnSlot = document.getElementById(`c${id}-btn-slot`);
+  const analyzeBtn = btnSlot?.querySelector('.btn-analyze-img');
+  if (analyzeBtn) analyzeBtn.disabled = false;
+  analyzeCharImage(id);
+}
+async function analyzeCharImage(id) {
+  const dataUrl = charImages[id];
+  if (!dataUrl) { showToast('⚠️ ارفع صورة أولاً', 'error'); return; }
+  const btnSlot = document.getElementById(`c${id}-btn-slot`);
+  const analyzeBtn = btnSlot?.querySelector('.btn-analyze-img');
+  const analyzing = document.getElementById(`c${id}-analyzing`);
+  const descField = document.getElementById(`c${id}-desc`);
+  if (analyzeBtn) analyzeBtn.disabled = true;
+  if (analyzing) analyzing.classList.add('show');
+  const [meta, b64] = dataUrl.split(',');
+  const mt = meta.match(/:(.+?);/)?.[1] || 'image/jpeg';
+  try {
+    const desc = await callAPI({
+      system: 'You are a character description writer for film. Analyze the image and write a detailed Arabic description of the character (physical appearance, clothing, vibe). 3-5 sentences. Output ONLY the description.',
+      userContent: [
+        { type: 'image', source: { type: 'base64', media_type: mt, data: b64 } },
+        { type: 'text', text: 'اكتب وصفاً تفصيلياً لهذه الشخصية باللغة العربية.' }
+      ]
+    });
+    if (descField) {
+      descField.value = desc.trim();
+      descField.style.borderColor = 'var(--teal)';
+      setTimeout(() => descField.style.borderColor = '', 2500);
+    }
+    showToast('✓ تم تحليل الشخصية', 'success');
+  } catch(e) { showToast('⚠️ خطأ: ' + e.message, 'error'); }
+  finally {
+    if (analyzeBtn) analyzeBtn.disabled = false;
+    if (analyzing) analyzing.classList.remove('show');
+  }
+}
+
+/* ═══════════════════════════════════════
+   LOCATION PROMPT
+═══════════════════════════════════════ */
+async function generateLocationPrompt() {
+  const location = document.getElementById('location')?.value.trim();
+  const envType = document.getElementById('env-type')?.value || '';
+  const time = document.getElementById('time-of-day')?.value || '';
+  const style = document.getElementById('style-select')?.value || '';
+  if (!location) { showToast('⚠️ أدخل اسم الموقع أولاً', 'error'); return; }
+  const btn = document.getElementById('loc-gen-prompt-btn');
+  const copyBtn = document.getElementById('loc-copy-prompt-btn');
+  const status = document.getElementById('loc-prompt-status');
+  const output = document.getElementById('loc-prompt-output');
+  btn.disabled = true; btn.innerHTML = '⏳ جاري التوليد...';
+  copyBtn.style.display = 'none'; output.value = ''; status.textContent = '';
+  try {
+    const result = await callAPI({
+      system: `You are an expert AI image prompt engineer for cinematic location storyboards. Generate a professional English prompt for a FULL cinematic storyboard of the location with AT LEAST 8 diverse shots. Single flowing paragraph. Start with "Cinematic location storyboard reference sheet — 8+ diverse shots:". Be literal about the location. Include all shot types: wide, interior, exterior, aerial, ground-level, etc. Apply visual style ${style || 'Cinematic Realism'}. Match lighting to time: ${time || 'Day'}. Output ONLY the prompt.`,
+      userText: `Location: ${location}${envType ? '\nEnvironment: ' + envType : ''}${time ? '\nTime: ' + time : ''}${style ? '\nStyle: ' + style : ''}`
+    });
+    output.value = result; copyBtn.style.display = 'flex'; status.textContent = '✓ جاهز';
+    setTimeout(() => status.textContent = '', 2000);
+  } catch(e) { showToast('⚠️ ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.innerHTML = '⚡ توليد برومبت الموقع'; }
+}
+function copyLocPrompt() {
+  const v = document.getElementById('loc-prompt-output')?.value;
+  if (v) copyText(v, () => { document.getElementById('loc-prompt-status').textContent = '✓ تم النسخ'; setTimeout(() => document.getElementById('loc-prompt-status').textContent = '', 2000); });
+}
+
+/* ═══════════════════════════════════════
+   CHARACTER PROMPT
+═══════════════════════════════════════ */
+async function generateCharPrompt(id) {
+  const desc = document.getElementById(`c${id}-desc`)?.value.trim();
+  if (!desc) { showToast('⚠️ أدخل وصف الشخصية أولاً', 'error'); return; }
+  const name = document.getElementById(`c${id}-name`)?.value.trim() || 'the character';
+  const age = document.getElementById(`c${id}-age`)?.value.trim() || '';
+  const role = document.getElementById(`c${id}-role`)?.value.trim() || '';
+  const style = document.getElementById('style-select')?.value || '';
+  const time = document.getElementById('time-of-day')?.value || '';
+  const btn = document.getElementById(`c${id}-gen-prompt-btn`);
+  const copyBtn = document.getElementById(`c${id}-copy-prompt-btn`);
+  const output = document.getElementById(`c${id}-prompt-output`);
+  const status = document.getElementById(`c${id}-prompt-status`);
+  btn.disabled = true; btn.innerHTML = '⏳ جاري التوليد...';
+  copyBtn.style.display = 'none'; output.value = ''; status.textContent = '';
+  try {
+    const result = await callAPI({
+      system: `You are an expert AI image prompt engineer for character reference sheets. Generate a professional English prompt. Start with "Highly detailed character reference sheet:". Include full body (front/side/back), facial close-up, expression sheet, consistent proportions. Apply visual style: ${style || 'Cinematic Realism'}. Output ONLY the prompt.`,
+      userText: `Character: ${name}${age ? ', Age: '+age : ''}${role ? ', Role: '+role : ''}\nDescription: ${desc}${style ? '\nStyle: '+style : ''}${time ? '\nTime: '+time : ''}`
+    });
+    output.value = result; copyBtn.style.display = 'flex'; status.textContent = '✓ جاهز';
+    setTimeout(() => status.textContent = '', 2000);
+  } catch(e) { showToast('⚠️ ' + e.message, 'error'); }
+  finally { btn.disabled = false; btn.innerHTML = '⚡ توليد برومبت الشخصية'; }
+}
+function copyCharPrompt(id) {
+  const v = document.getElementById(`c${id}-prompt-output`)?.value;
+  if (v) copyText(v, () => { document.getElementById(`c${id}-prompt-status`).textContent = '✓ تم النسخ'; setTimeout(() => document.getElementById(`c${id}-prompt-status`).textContent = '', 2000); });
+}
+
+/* ═══════════════════════════════════════
+   REPHRASE STORY
+═══════════════════════════════════════ */
+async function rephraseStory() {
+  const raw = document.getElementById('story-raw-input')?.value.trim();
+  if (!raw) { showToast('⚠️ الرجاء كتابة القصة أولاً', 'error'); return; }
+  const btn = document.getElementById('rephrase-btn');
+  const loading = document.getElementById('rephrase-loading');
+  btn.disabled = true; loading.classList.add('show');
+  try {
+    const result = await callAPI({
+      system: 'أنت كاتب سيناريو محترف. أعد كتابة القصة بصياغة احترافية غنية بالتفاصيل البصرية. احتفظ بنفس الأحداث والشخصيات. أضف تفاصيل بصرية وحالة مزاجية. باللغة العربية فقط. لا تضف مقدمة — فقط القصة.',
+      userText: `القصة:\n${raw}\n\nأعد صياغتها:`
+    });
+    if (result) {
+      document.getElementById('story-input').value = result.trim();
+      document.getElementById('story-refined-wrap').style.display = 'block';
+      document.getElementById('story-settings-wrap').style.display = 'grid';
+      document.getElementById('fill-btn').style.display = 'flex';
+      setTimeout(() => document.getElementById('story-refined-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+      showToast('✓ تمت الصياغة الاحترافية', 'success');
+    }
+  } catch(e) { showToast('⚠️ ' + e.message, 'error'); }
+  finally { btn.disabled = false; loading.classList.remove('show'); }
+}
+
+/* ═══════════════════════════════════════
+   FILL FORM FROM STORY
+═══════════════════════════════════════ */
+async function fillFormFromStory() {
+  const story = document.getElementById('story-input')?.value.trim();
+  if (!story) { showToast('⚠️ الرجاء كتابة القصة أولاً', 'error'); return; }
+  if (!document.getElementById('shots-count').value) { showToast('⚠️ حدد عدد اللقطات', 'error'); return; }
+  if (!document.getElementById('total-duration').value) { showToast('⚠️ حدد مدة الفيديو', 'error'); return; }
+  const btn = document.getElementById('fill-btn');
+  const loading = document.getElementById('fill-loading');
+  const loadingText = document.getElementById('fill-loading-text');
+  btn.disabled = true; loading.classList.add('show'); loadingText.textContent = '⏳ يحلل القصة...';
+  const shotsCount = document.getElementById('shots-count')?.value || '6';
+  const totalDur = document.getElementById('total-duration')?.value || '10';
+  try {
+    const raw = await callAPI({
+      system: `You are a professional storyboard director. Analyze the story and extract storyboard data as valid JSON only — no markdown, no fences.
+Structure:
+{
+  "version":"1.0",
+  "scene":{"title":"string","summary":"string","genre":"one of: Science Fiction,Adventure,Drama,Romance,Action,Kids,Thriller,Comedy,Horror","duration":"total like '15 secs'","envType":"Indoor or Outdoor","time":"Day or Sunset or Night or Dawn or Sunrise","location":"string","style":"one of: coloring-book,craftmotion,fantasy,photorealistic,inkprint,plasticinepeople,darkneoclassical,cartoonfun,boldflat,mockup,Cinematic Realism,Anime,Futuristic"},
+  "characters":[{"name":"string","age":"string","role":"string","desc":"string"}],
+  "shots":[{"name":"string","duration":"5 secs","size":"one of: Extra Wide,Wide,Wide Scene,Medium Wide,Medium,Close-up,Macro","camPos":"one of: Aerial Camera,Drone Shot,Overhead Shot,Ground-Level Shot,High-angle shot,Low-angle shot,Medium shot (eye-level),Dutch angle shot,Eye-level shot,Sitting-level shot,Knee-level shot","camStyle":"one of: Gradual Close-up,Zoom In,Pull Back,Horizontal Scan,Handheld,Steady,Rotate,Lift Up","mood":"one of: Luxury,Optimistic,Energetic,Warm,Mysterious,Playful,Romantic,Melancholy,Epic,Dark,Calm,Nostalgic","chars":["names"],"desc":"string","neg":"string","sound":"Yes or No","music":"Yes or No","sfx":"Yes or No"}]
+}
+Rules: EXACTLY ${shotsCount} shots. Durations sum to ${totalDur} secs. Each duration one of: 3,4,5,6,7,8 secs. Output ONLY JSON.`,
+      userText: `Create storyboard with EXACTLY ${shotsCount} shots, total ${totalDur} seconds.\n\nStory:\n${story}`
+    });
+    const start = raw.indexOf('{'); const end = raw.lastIndexOf('}');
+    if (start === -1) throw new Error('لم يُنتج JSON صالح');
+    const parsed = JSON.parse(raw.slice(start, end + 1));
+    if (!parsed.scene) throw new Error('بيانات غير مكتملة');
+    loadingText.textContent = '✓ يعبئ النموذج...';
+    applySceneData(parsed);
+    loading.classList.remove('show');
+    showToast(`✓ تم تعبئة النموذج — ${parsed.shots?.length || 0} لقطات`, 'success');
+    document.querySelector('.section')?.scrollIntoView({ behavior: 'smooth' });
+  } catch(e) { loading.classList.remove('show'); showToast('⚠️ ' + e.message, 'error'); }
+  finally { btn.disabled = false; }
+}
+
+/* ═══════════════════════════════════════
+   APPLY SCENE DATA
+═══════════════════════════════════════ */
+function applySceneData(data) {
+  const s = data.scene;
+  if (!s) return;
+  document.getElementById('scene-title').value  = s.title || '';
+  document.getElementById('story-summary').value = s.summary || '';
+  document.getElementById('location').value      = s.location || '';
+  const setVal = (id, val) => { if (val) { const el = document.getElementById(id); if (el) el.value = val; } };
+  setVal('genre-select', s.genre); setVal('duration', s.duration);
+  setVal('env-type', s.envType); setVal('time-of-day', s.time);
+  // Style
+  if (s.style) {
+    const opt = STYLE_OPTIONS.find(o => o.value === s.style);
+    if (opt) selectStyle(opt);
+    else { document.getElementById('style-select').value = s.style; }
+  }
+  // Characters
+  charCount = 0; document.getElementById('chars-container').innerHTML = '';
+  (data.characters || []).forEach(c => {
+    addChar(); const id = charCount;
+    setVal(`c${id}-name`, c.name); setVal(`c${id}-age`, c.age);
+    setVal(`c${id}-role`, c.role); setVal(`c${id}-desc`, c.desc);
+  });
+  if (charCount === 0) { addChar(); addChar(); }
+  updateCharSelects();
+  // Shots
+  shotCount = 0; document.getElementById('shots-container').innerHTML = '';
+  (data.shots || []).forEach(sh => {
+    addShot(); const id = shotCount;
+    setVal(`s${id}-name`, sh.name); updateShotPreview(id);
+    setVal(`s${id}-dur`, sh.duration);
+    setVal(`s${id}-cam`, sh.camStyle); setVal(`s${id}-mood`, sh.mood);
+    setVal(`s${id}-desc`, sh.desc); setVal(`s${id}-neg`, sh.neg);
+    if (sh.size) { const opt = SHOT_SIZE_OPTIONS.find(o => o.value === sh.size); if (opt) selectShotSize(opt, id); }
+    if (sh.camPos) { const opt = CAM_POS_OPTIONS.find(o => o.value === sh.camPos); if (opt) selectCamPos(opt, id); }
+    const soundRows = document.querySelectorAll(`#shot-${id} .sound-row`);
+    [sh.sound, sh.music, sh.sfx].forEach((v, i) => {
+      const row = soundRows[i]; if (!row) return;
+      row.querySelectorAll('.toggle-btn').forEach(b => { b.classList.remove('active','yes','no'); if (b.textContent.trim() === (v||'Yes')) b.classList.add('active', (v||'Yes').toLowerCase()); });
+    });
+    setTimeout(() => {
+      const sel = document.getElementById(`s${id}-chars`);
+      if (sel && sh.chars) [...sel.options].forEach(o => o.selected = sh.chars.includes(o.value));
+    }, 150);
+  });
+  if (shotCount === 0) { addShot(); addShot(); }
+}
+
+/* ═══════════════════════════════════════
+   GENERATE MAIN PROMPT
+═══════════════════════════════════════ */
+function stopGenerate() { if (generateActive) generateAborted = true; }
+
+async function generate() {
+  const btn = document.getElementById('gen-btn');
+  const stopBtn = document.getElementById('stop-btn');
+  const errorBox = document.getElementById('error-box');
+  errorBox.classList.remove('show');
+  document.getElementById('output-body').textContent = '';
+  document.getElementById('output-section').classList.remove('show');
+
+  const title = document.getElementById('scene-title').value.trim();
+  const summary = document.getElementById('story-summary').value.trim();
+  const genre = document.getElementById('genre-select')?.value || 'Cinematic';
+  const duration = document.getElementById('duration').value;
+  const envType = document.getElementById('env-type').value;
+  const timeOfDay = document.getElementById('time-of-day').value;
+  const location = document.getElementById('location').value.trim();
+  const styleSel = document.getElementById('style-select');
+  const style = styleSel?.value === 'custom'
+    ? (document.getElementById('custom-style-input')?.value.trim() || 'Custom Style')
+    : (styleSel?.value || 'Cinematic Realism');
+  const chars = getCharacters();
+  const shots = getShots();
+  if (!summary && !location && shots.length === 0) {
+    errorBox.textContent = '⚠️ الرجاء إدخال ملخص المشهد واللقطات على الأقل';
+    errorBox.classList.add('show'); return;
+  }
+
+  btn.disabled = true; btn.style.display = 'none';
+  stopBtn.classList.add('show'); generateAborted = false; generateActive = true;
+
+  const lfData = getLastFrameData();
+  const formData = `Scene Title: ${title || 'Untitled'}
+Story Summary: ${summary || 'Not provided'}
+Genre: ${genre}
+Duration: ${duration}
+Location: ${location || 'Not specified'}
+Environment: ${envType}
+Time: ${timeOfDay}
+Visual Style: ${style}
+
+Characters:
+${chars.map((c,i)=>`${i+1}: ${c.name}${c.ref?' '+c.ref:''}${c.age?' - Age: '+c.age:''}${c.role?' - Role: '+c.role:''}${c.desc?' - '+c.desc:''}`).join('\n') || 'None'}
+
+Character Ref Tags: ${chars.map(c=>`${c.name} → ${c.ref||('@img'+(chars.indexOf(c)+1))}`).join(' | ') || 'None'}
+
+Shots:
+${shots.map((s,i)=>`Shot ${i+1}:
+  Name: ${s.name}
+  Duration: ${s.dur}
+  Size: ${s.size}
+  Camera Style: ${s.camStyle}
+  Camera Position: ${s.camPos || 'Not specified'}
+  Mood: ${s.mood}
+  Characters: ${s.chars ? s.chars.split(', ').map(n => { const ch = chars.find(c=>c.name===n); return ch ? n+' '+(ch.ref||'') : n; }).join(', ') : 'All'}
+  Description: ${s.desc || 'Not described'}
+  Negative: ${s.neg || 'None'}
+  Sound: ${s.sound} | Music: ${s.music} | SFX: ${s.sfx}`).join('\n')}`;
+
+  try {
+    const result = await callAPI({
+      system: `You are a professional AI video prompt engineer for Seedance, Kling AI, Runway ML, and Sora.
+Output a clean English prompt document. Always start with: "Create a storyboard for me"
+Format for each shot:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SHOT [N] — [NAME] | [DURATION]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[Shot Size] | [Camera Style] | [Mood]
+Characters: [name @imgN ...]
+
+PROMPT:
+[Vivid cinematic description. Embed shot info naturally. Append @imgN after each character name. Include visual style, lighting, atmosphere, camera movement. 2-4 sentences.]
+
+NEGATIVE: [...]
+SOUND: [...] | MUSIC: [...] | SFX: [...]
+
+LANGUAGE: English only. Translate Arabic silently. Exception: if shot desc says "اكتب باللغة العربية (text)" include the Arabic text as on-screen text; if "يقول/تقول باللغة العربية (text)" include as spoken dialogue.
+STYLE ENFORCEMENT: Visual Style must dominate every shot. Time of day must define all lighting.
+Apply relevant style tags (coloring-book, craftmotion, fantasy, photorealistic, inkprint, plasticinepeople, darkneoclassical, cartoonfun, boldflat, mockup) at end of prompts.`,
+      userText: `Generate prompts for this storyboard:\n${formData}${lfData ? `\n\nLAST FRAME: This video starts from last frame of previous video (${lfData.ref}). Description: ${lfData.desc}. Add "Starts from last frame ${lfData.ref}" at end of ALL shot prompts.` : ''}`
+    });
+    if (generateAborted) throw { name: 'AbortError' };
+    document.getElementById('output-body').textContent = result;
+    document.getElementById('output-section').classList.add('show');
+    document.getElementById('output-section').scrollIntoView({ behavior: 'smooth' });
+  } catch(e) {
+    if (e.name === 'AbortError') showToast('⊗ تم إيقاف التوليد', 'error');
+    else { errorBox.textContent = '⚠️ خطأ: ' + e.message; errorBox.classList.add('show'); }
+  } finally {
+    generateAborted = false; generateActive = false;
+    btn.disabled = false; btn.style.display = ''; btn.textContent = '✦ Generate Prompt — توليد البرومبت';
+    stopBtn.classList.remove('show');
+  }
+}
+
+/* ═══════════════════════════════════════
+   SAVE / LOAD
+═══════════════════════════════════════ */
+function saveToFile() {
+  const title = document.getElementById('scene-title').value.trim() || 'storyboard';
+  const data = {
+    version: '1.0', savedAt: new Date().toISOString(),
+    scene: {
+      title: document.getElementById('scene-title').value,
+      summary: document.getElementById('story-summary').value,
+      genre: document.getElementById('genre-select')?.value || '',
+      duration: document.getElementById('duration').value,
+      envType: document.getElementById('env-type').value,
+      time: document.getElementById('time-of-day').value,
+      location: document.getElementById('location').value,
+      style: document.getElementById('style-select')?.value || '',
+    },
+    characters: [...document.querySelectorAll('.char-card')].map(card => {
+      const id = card.id.replace('char-','');
+      return { name: document.getElementById(`c${id}-name`)?.value || '', ref: document.getElementById(`c${id}-ref`)?.value || '', age: document.getElementById(`c${id}-age`)?.value || '', role: document.getElementById(`c${id}-role`)?.value || '', desc: document.getElementById(`c${id}-desc`)?.value || '' };
+    }),
+    shots: [...document.querySelectorAll('.shot-card')].map(card => {
+      const id = card.id.replace('shot-','');
+      const rows = card.querySelectorAll('.sound-row');
+      return { name: document.getElementById(`s${id}-name`)?.value || '', duration: document.getElementById(`s${id}-dur`)?.value || '', size: document.getElementById(`s${id}-size`)?.value || '', camStyle: document.getElementById(`s${id}-cam`)?.value || '', camPos: document.getElementById(`s${id}-campos`)?.value || '', mood: document.getElementById(`s${id}-mood`)?.value || '', chars: [...(document.getElementById(`s${id}-chars`)?.selectedOptions||[])].map(o=>o.value), desc: document.getElementById(`s${id}-desc`)?.value || '', neg: document.getElementById(`s${id}-neg`)?.value || '', sound: rows[0]?.querySelector('.toggle-btn.active')?.textContent || 'Yes', music: rows[1]?.querySelector('.toggle-btn.active')?.textContent || 'Yes', sfx: rows[2]?.querySelector('.toggle-btn.active')?.textContent || 'Yes' };
+    })
+  };
+  try {
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = title.replace(/[^\w\u0600-\u06FF]/g,'') + '_storyboard.json';
+    a.style.display = 'none'; document.body.appendChild(a); a.click();
+    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+    showToast('✓ تم الحفظ', 'success');
+  } catch(e) { showToast('⚠️ ' + e.message, 'error'); }
+}
+function loadFromFile(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.scene) throw new Error('ملف غير صالح');
+      applySceneData(data);
+      showToast(`✓ تم تحميل "${file.name}"`, 'success');
+    } catch(err) { showToast('⚠️ ' + err.message, 'error'); }
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+}
+
+/* ═══════════════════════════════════════
+   CLEAR ALL
+═══════════════════════════════════════ */
+function clearAll() {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML = `<div style="background:#0b0d11;border:1px solid #ef4444;border-top:2px solid #c9a84c;border-radius:14px;padding:28px 32px;max-width:340px;width:90%;text-align:center;font-family:'Cairo',sans-serif;">
+    <div style="font-size:26px;margin-bottom:12px;">⚠️</div>
+    <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:8px;">مسح جميع البيانات؟</div>
+    <div style="font-size:12px;color:#6b8599;margin-bottom:22px;">سيتم حذف كل البيانات المدخلة.</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button id="cy" style="background:#ef4444;border:none;color:#fff;padding:9px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Cairo',sans-serif;">نعم، امسح</button>
+      <button id="cn" style="background:#141820;border:1px solid #253040;color:#dde3ec;padding:9px 22px;border-radius:8px;font-size:13px;cursor:pointer;font-family:'Cairo',sans-serif;">إلغاء</button>
+    </div></div>`;
+  document.body.appendChild(overlay);
+  document.getElementById('cn').onclick = () => overlay.remove();
+  document.getElementById('cy').onclick = () => {
+    overlay.remove();
+    ['scene-title','story-summary','location','story-raw-input','story-input'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const box = document.getElementById('style-selected-box');
+    if (box) { box.classList.remove('has-selection'); box.innerHTML = '<div class="style-add-icon">＋</div><div class="style-add-label">اختر الاستايل البصري</div>'; }
+    document.getElementById('style-select').value = '';
+    document.getElementById('custom-style-wrap').classList.remove('show');
+    document.getElementById('chars-container').innerHTML = ''; charCount = 0;
+    document.getElementById('shots-container').innerHTML = ''; shotCount = 0;
+    document.getElementById('output-section').classList.remove('show');
+    document.getElementById('error-box').classList.remove('show');
+    document.getElementById('story-refined-wrap').style.display = 'none';
+    document.getElementById('story-settings-wrap').style.display = 'none';
+    document.getElementById('fill-btn').style.display = 'none';
+    addChar(); addChar(); addShot(); addShot();
+  };
+}
+
+/* ═══════════════════════════════════════
+   OUTPUT
+═══════════════════════════════════════ */
+function copyOutput() {
+  const text = document.getElementById('output-body').textContent;
+  const btn = document.getElementById('copy-output-btn');
+  copyText(text, () => { btn.textContent = '✓ تم'; setTimeout(() => btn.textContent = '⊕ نسخ', 2000); });
+}
+function clearOutput() {
+  document.getElementById('output-body').textContent = '';
+  document.getElementById('output-section').classList.remove('show');
+}
+
+/* ═══════════════════════════════════════
+   API HELPER
+═══════════════════════════════════════ */
+async function callAPI({ system, userText, userContent }) {
+  const messages = [{ role: 'user', content: userContent || [{ type: 'text', text: userText }] }];
+  const res = await fetch('https://raspy-lab-1335.battal-graphics.workers.dev', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 4000,
+      system: system,
+      messages
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'API error');
+  if (generateAborted) throw { name: 'AbortError' };
+  return data.content?.find(b => b.type === 'text')?.text || '';
+}
+
+/* ═══════════════════════════════════════
+   UTILS
+═══════════════════════════════════════ */
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+function copyText(text, onSuccess) {
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(onSuccess).catch(() => fallbackCopy(text, onSuccess));
+  } else fallbackCopy(text, onSuccess);
+}
+function fallbackCopy(text, onSuccess) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.cssText = 'position:fixed;top:-9999px;opacity:0;';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try { document.execCommand('copy'); onSuccess?.(); }
+  catch(e) { showToast('⚠️ تعذّر النسخ', 'error'); }
+  document.body.removeChild(ta);
+}
+
+/* ═══════════════════════════════════════
+   INIT
+═══════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  addChar(); addChar();
+  addShot(); addShot();
+});
+</script>
+</body>
+</html>
