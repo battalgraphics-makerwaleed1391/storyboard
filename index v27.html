@@ -1,0 +1,3199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SceneCraft</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --sidebar-bg: #111111;
+    --sidebar-border: #1e1e1e;
+    --card: #161616;
+    --card-hover: #1c1c1c;
+    --border: #222222;
+    --text: #e8e8e8;
+    --text-muted: #666;
+    --text-dim: #999;
+    --accent: #ffffff;
+    --accent-glow: rgba(255,255,255,0.08);
+    --active-bg: #1e1e1e;
+    --active-border: #333;
+    --btn-primary: #1a1a1a;
+    --btn-primary-hover: #242424;
+    --generate-btn: #2a2a2a;
+    --generate-btn-hover: #333;
+    --sidebar-w: 200px;
+    --sidebar-w-collapsed: 60px;
+    --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    width: var(--sidebar-w);
+    min-width: var(--sidebar-w);
+    height: 100vh;
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
+    display: flex;
+    flex-direction: column;
+    transition: width var(--transition), min-width var(--transition);
+    overflow: hidden;
+    position: relative;
+    z-index: 10;
+  }
+
+  #sidebar.collapsed {
+    width: var(--sidebar-w-collapsed);
+    min-width: var(--sidebar-w-collapsed);
+  }
+
+  /* Logo */
+  .sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 14px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid var(--sidebar-border);
+    min-height: 56px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .logo-icon {
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-icon svg { width: 28px; height: 28px; }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.02em;
+    opacity: 1;
+    transition: opacity var(--transition);
+    white-space: nowrap;
+  }
+
+  #sidebar.collapsed .logo-text { opacity: 0; width: 0; overflow: hidden; }
+
+  /* Nav */
+  .sidebar-nav {
+    flex: 1;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+    border: 1px solid transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    min-height: 36px;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-weight: 400;
+    text-decoration: none;
+  }
+
+  .nav-item:hover {
+    background: var(--active-bg);
+    color: var(--text);
+    border-color: var(--active-border);
+  }
+
+  .nav-item.active {
+    background: var(--active-bg);
+    color: var(--text);
+    border-color: var(--active-border);
+  }
+
+  .nav-icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+  }
+
+  .nav-item:hover .nav-icon,
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  .nav-icon svg { width: 15px; height: 15px; }
+
+  .nav-label {
+    opacity: 1;
+    transition: opacity var(--transition);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  #sidebar.collapsed .nav-label { opacity: 0; width: 0; overflow: hidden; }
+
+  /* User */
+  .sidebar-user {
+    padding: 12px 8px;
+    border-top: 1px solid var(--sidebar-border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #2a2a2a;
+    border: 1px solid #333;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--text-dim);
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+  }
+
+  .user-info { overflow: hidden; }
+
+  .user-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity var(--transition);
+  }
+
+  .user-plan {
+    font-size: 10px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity var(--transition);
+  }
+
+  #sidebar.collapsed .user-name,
+  #sidebar.collapsed .user-plan { opacity: 0; }
+
+  /* ── MAIN ── */
+  #main {
+    flex: 1;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--bg);
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; padding: 40px 48px; animation: fadeIn 0.2s ease; }
+  .page.active { display: block; }
+
+  @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform:none; } }
+
+  /* Page Header */
+  .page-header {
+    margin-bottom: 32px;
+  }
+
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .page-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ── HOME PAGE ── */
+  .home-welcome {
+    text-align: center;
+    padding: 80px 20px 60px;
+  }
+
+  .home-welcome h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  .home-welcome p {
+    font-size: 14px;
+    color: var(--text-muted);
+    max-width: 420px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+  }
+
+  .home-tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .home-tool-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: background var(--transition), border-color var(--transition);
+    text-align: left;
+  }
+
+  .home-tool-card:hover {
+    background: var(--card-hover);
+    border-color: #333;
+  }
+
+  .home-tool-icon {
+    width: 36px;
+    height: 36px;
+    background: #1e1e1e;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+
+  .home-tool-icon svg { width: 16px; height: 16px; color: var(--text-dim); }
+
+  .home-tool-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .home-tool-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* ── SHARED FORM STYLES ── */
+  .form-label { font-size: 12px; color: #666; margin-bottom: 8px; display: block; font-weight: 500; }
+
+  textarea, input[type="text"] {
+    width: 100%; background: #0a0a0a; border: 1px solid #1e1e1e;
+    border-radius: 8px; color: #e8e8e8; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; padding: 11px 13px; resize: vertical; outline: none;
+    transition: border-color 0.2s; line-height: 1.6;
+  }
+  textarea:focus, input[type="text"]:focus { border-color: #2e2e2e; }
+  textarea { min-height: 80px; }
+  textarea.output { min-height: 100px; color: #777; font-family: monospace; font-size: 11px; direction: ltr; text-align: left; line-height: 1.7; }
+  textarea.large { min-height: 130px; }
+
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #222; font-family: 'DM Sans', sans-serif; transition: all 0.2s; outline: none; }
+  .btn-generate { background: #1a1a1a; color: #e8e8e8; border-color: #2a2a2a; margin-top: 12px; font-size: 13px; padding: 10px 20px; }
+  .btn-generate:hover { background: #222; border-color: #333; }
+  .btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-prompt { background: #131313; color: #777; border-color: #1e1e1e; margin-top: 12px; }
+  .btn-prompt:hover { background: #1a1a1a; color: #e8e8e8; border-color: #2a2a2a; }
+  .btn-copy { background: transparent; color: #555; border-color: #1e1e1e; padding: 5px 11px; font-size: 11px; }
+  .btn-copy:hover { color: #999; border-color: #2a2a2a; }
+  .btn-save { background: #141414; color: #e8e8e8; border-color: #222; margin-top: 16px; }
+  .btn-save:hover { background: #1a1a1a; border-color: #2e2e2e; }
+  .btn-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .output-box { position: relative; margin-top: 14px; }
+  .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .spinner { width: 13px; height: 13px; border: 2px solid #2a2a2a; border-top-color: #666; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+  .spinner.active { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .upload-area { border: 1px dashed #222; border-radius: 8px; padding: 22px; text-align: center; cursor: pointer; transition: border-color 0.2s, background 0.2s; background: #0a0a0a; margin-bottom: 10px; position: relative; }
+  .upload-area:hover { border-color: #2e2e2e; background: #111; }
+  .upload-area input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-icon { margin-bottom: 8px; }
+  .upload-icon svg { width: 20px; height: 20px; color: #3a3a3a; }
+  .upload-text { font-size: 11px; color: #555; }
+  .upload-preview { margin-top: 10px; display: none; }
+  .upload-preview img { max-height: 160px; border-radius: 8px; border: 1px solid #1e1e1e; object-fit: cover; }
+
+  /* ── FULL SCENE — index.html inspired layout ── */
+  .fs-wrap { max-width: 860px; }
+  .fs-story-input-section { margin-bottom: 14px; background: #0f0f0f; border: 1px solid #1e1e1e; border-top: 2px solid #2a2a2a; border-radius: 12px; overflow: hidden; }
+  .fs-section { margin-bottom: 12px; background: #0f0f0f; border: 1px solid #1a1a1a; border-radius: 12px; overflow: hidden; transition: border-color 0.2s; }
+  .fs-section:hover { border-color: #252525; }
+  .fs-section-header { display: flex; align-items: center; gap: 10px; padding: 13px 18px; border-bottom: 1px solid #161616; background: linear-gradient(90deg, #131313, #0f0f0f); cursor: pointer; user-select: none; transition: background 0.2s; }
+  .fs-section-header:hover { background: linear-gradient(90deg, #161616, #111); }
+  .fs-section-icon { width: 28px; height: 28px; background: #161616; border: 1px solid #222; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .fs-section-label { flex: 1; }
+  .fs-section-title-en { font-family: monospace; font-size: 10px; color: #555; letter-spacing: 0.12em; text-transform: uppercase; }
+  .fs-section-title-main { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #e8e8e8; }
+  .fs-chevron { font-size: 11px; color: #444; transition: transform 0.25s; flex-shrink: 0; }
+  .fs-chevron.open { transform: rotate(180deg); }
+  .fs-section-body { padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+  .fs-section-body.collapsed { display: none; }
+  .fs-field { display: flex; flex-direction: column; gap: 5px; }
+  .fs-field-label { display: flex; align-items: baseline; font-size: 10px; font-family: monospace; color: #555; text-transform: uppercase; letter-spacing: 1.5px; }
+  .fs-field-label .sep { color: #2a2a2a; margin: 0 6px; }
+  .fs-field-label-ar { font-size: 13px; font-family: 'DM Sans', sans-serif; color: #999; font-weight: 600; letter-spacing: 0; text-transform: none; }
+  .fs-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .fs-grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 700px) { .fs-grid2, .fs-grid3 { grid-template-columns: 1fr; } }
+  select { width: 100%; background: #0a0a0a; border: 1px solid #1e1e1e; border-radius: 8px; color: #e8e8e8; font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 10px 13px; outline: none; transition: border-color 0.2s; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23444' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+  select:focus { border-color: #2a2a2a; }
+
+  /* Char cards */
+  .fs-chars-container, .fs-shots-container { display: flex; flex-direction: column; gap: 10px; }
+  .fs-char-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 10px; padding: 14px; position: relative; transition: border-color 0.2s; }
+  .fs-char-card:hover { border-color: #222; }
+  .fs-char-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer; }
+  .fs-char-num { width: 22px; height: 22px; border-radius: 50%; background: #161616; border: 1px solid #222; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #666; font-family: monospace; flex-shrink: 0; }
+  .fs-char-title { font-size: 12px; font-family: monospace; color: #666; flex: 1; }
+  .fs-char-remove { margin-left: auto; background: none; border: none; color: #333; font-size: 14px; cursor: pointer; padding: 2px 6px; border-radius: 4px; transition: all 0.15s; }
+  .fs-char-remove:hover { background: rgba(239,68,68,0.1); color: #fca5a5; }
+  .fs-char-collapse-btn { background: none; border: none; color: #333; font-size: 11px; cursor: pointer; padding: 4px; transition: transform 0.2s; }
+  .fs-char-collapse-btn.open { transform: rotate(180deg); }
+  .fs-char-body.collapsed { display: none; }
+  .fs-char-img-row { display: flex; gap: 14px; align-items: flex-start; }
+  .fs-char-img-wrap { position: relative; width: 66px; height: 66px; flex-shrink: 0; }
+  .fs-char-img-preview { width: 66px; height: 66px; border-radius: 8px; object-fit: cover; border: 1px solid #222; display: none; cursor: pointer; }
+  .fs-char-img-placeholder { width: 66px; height: 66px; border-radius: 8px; border: 1px dashed #222; background: #0a0a0a; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.15s; gap: 3px; }
+  .fs-char-img-placeholder:hover { border-color: #2e2e2e; background: #111; }
+  .fs-char-img-placeholder-icon { font-size: 18px; }
+  .fs-char-img-placeholder-text { font-size: 8px; color: #3a3a3a; font-family: monospace; text-align: center; }
+  .fs-char-img-input { display: none; }
+  .fs-char-img-delete { position: absolute; top: -5px; left: -5px; width: 17px; height: 17px; background: #ef4444; border: 2px solid #0d0d0d; border-radius: 50%; color: #fff; font-size: 9px; cursor: pointer; display: none; align-items: center; justify-content: center; z-index: 10; }
+  .fs-char-fields { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .fs-char-prompt-box { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .fs-char-prompt-output { width: 100%; min-height: 80px; background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 6px; color: #666; font-family: monospace; font-size: 11px; line-height: 1.7; padding: 10px 12px; resize: vertical; direction: ltr; text-align: left; }
+
+  /* Shot cards */
+  .fs-shot-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 10px; overflow: hidden; transition: border-color 0.2s; }
+  .fs-shot-card:hover { border-color: #222; }
+  .fs-shot-header { display: flex; align-items: center; gap: 10px; padding: 11px 15px; background: linear-gradient(90deg, #111, #0a0a0a); border-bottom: 1px solid #161616; cursor: pointer; user-select: none; }
+  .fs-shot-num { width: 26px; height: 26px; border-radius: 6px; background: #161616; border: 1px solid #222; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 11px; color: #666; flex-shrink: 0; }
+  .fs-shot-name-preview { font-size: 13px; font-weight: 600; color: #e8e8e8; flex: 1; }
+  .fs-shot-remove { background: none; border: none; color: #333; font-size: 12px; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: all 0.15s; }
+  .fs-shot-remove:hover { background: rgba(239,68,68,0.1); color: #fca5a5; }
+  .fs-shot-collapse-btn { background: none; border: none; color: #333; font-size: 11px; cursor: pointer; padding: 4px; transition: transform 0.2s; }
+  .fs-shot-collapse-btn.open { transform: rotate(180deg); }
+  .fs-shot-body { padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+  .fs-shot-body.collapsed { display: none; }
+
+  /* Add buttons */
+  .btn-add-card { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px; background: transparent; border: 1px dashed #1e1e1e; border-radius: 8px; color: #444; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; margin-top: 4px; }
+  .btn-add-card:hover { border-color: #2a2a2a; color: #777; background: #0f0f0f; }
+
+  /* Analyze/gen-prompt buttons */
+  .btn-analyze { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; background: #111; border: 1px solid #1e1e1e; border-radius: 7px; color: #888; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; white-space: nowrap; font-weight: 500; }
+  .btn-analyze:hover { background: #161616; color: #bbb; border-color: #2a2a2a; }
+  .btn-analyze:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-gen-cprompt { display: inline-flex; align-items: center; gap: 7px; padding: 8px 14px; background: #0f0f0f; border: 1px solid #1a1a1a; border-radius: 7px; color: #888; font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; font-weight: 500; }
+  .btn-gen-cprompt:hover { background: #141414; color: #bbb; border-color: #222; }
+  .btn-gen-cprompt:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Gen bar */
+  .fs-gen-bar { position: sticky; bottom: 16px; z-index: 50; display: flex; gap: 10px; padding: 13px 18px; background: rgba(10,10,10,0.95); border: 1px solid #1e1e1e; border-radius: 12px; backdrop-filter: blur(16px); box-shadow: 0 8px 40px rgba(0,0,0,0.8); margin-top: 20px; }
+  .fs-btn-generate { flex: 1; padding: 12px 22px; background: #161616; border: 1px solid #2a2a2a; border-radius: 8px; color: #e8e8e8; font-family: 'Syne', sans-serif; font-size: 13px; letter-spacing: 0.04em; cursor: pointer; transition: all 0.2s; }
+  .fs-btn-generate:hover { background: #1e1e1e; border-color: #333; }
+  .fs-btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
+  .fs-btn-stop { flex: 1; padding: 12px 22px; background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; color: #fca5a5; font-family: 'Syne', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.2s; display: none; align-items: center; justify-content: center; gap: 8px; }
+  .fs-btn-stop:hover { background: rgba(239,68,68,0.15); }
+  .fs-btn-stop.show { display: flex; }
+  .fs-btn-clear { padding: 11px 13px; background: transparent; border: 1px solid #1e1e1e; border-radius: 8px; color: #444; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .fs-btn-clear:hover { border-color: rgba(239,68,68,0.3); color: #fca5a5; }
+  .fs-btn-save-proj { padding: 11px 13px; background: #111; border: 1px solid #1e1e1e; border-radius: 8px; color: #666; font-size: 12px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+  .fs-btn-save-proj:hover { background: #161616; border-color: #252525; color: #e8e8e8; }
+
+  /* Output */
+  .fs-output-section { margin-top: 16px; background: #0f0f0f; border: 1px solid #1a1a1a; border-radius: 12px; overflow: hidden; display: none; }
+  .fs-output-section.show { display: block; }
+  .fs-output-header { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-bottom: 1px solid #161616; }
+  .fs-output-title { font-family: monospace; font-size: 10px; color: #555; letter-spacing: 0.1em; text-transform: uppercase; flex: 1; }
+  .fs-btn-copy-out { padding: 5px 12px; background: #141414; border: 1px solid #222; border-radius: 20px; color: #666; font-size: 11px; font-family: monospace; cursor: pointer; transition: all 0.15s; }
+  .fs-btn-copy-out:hover { background: #1a1a1a; color: #999; }
+  .fs-output-body { padding: 18px; font-family: monospace; font-size: 12px; color: #93c5fd; line-height: 1.8; white-space: pre-wrap; direction: ltr; text-align: left; max-height: 500px; overflow-y: auto; }
+
+  /* Error + loading */
+  .fs-error-box { padding: 11px 15px; background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; font-size: 12px; color: #fca5a5; font-family: monospace; margin-top: 12px; display: none; }
+  .fs-error-box.show { display: block; }
+  .fs-loading { display: none; align-items: center; gap: 8px; padding: 9px 12px; background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 6px; font-size: 11px; font-family: monospace; color: #444; }
+  .fs-loading.show { display: flex; }
+  .fs-loading-ring { width: 13px; height: 13px; border: 2px solid #1e1e1e; border-top-color: #444; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  .fs-char-analyzing { font-size: 11px; font-family: monospace; color: #444; display: none; align-items: center; gap: 6px; }
+  .fs-char-analyzing.show { display: flex; }
+  .fs-char-analyzing-ring { width: 11px; height: 11px; border: 2px solid #1e1e1e; border-top-color: #444; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+  .fs-toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: #111; border: 1px solid #1e1e1e; border-radius: 999px; padding: 9px 18px; font-size: 12px; font-family: monospace; color: #e8e8e8; z-index: 9999; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
+  .fs-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .fs-toast.success { border-color: rgba(0,201,167,0.3); color: #5eead4; }
+  .fs-toast.error { border-color: rgba(239,68,68,0.3); color: #fca5a5; }
+
+  /* ── GLOBAL LOADING OVERLAY ── */
+  .sc-loading-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 9000;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(3px);
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 20px;
+  }
+  .sc-loading-overlay.show { display: flex; }
+
+  .sc-loader-box {
+    background: #0f0f0f;
+    border: 1px solid #222;
+    border-radius: 14px;
+    padding: 28px 36px;
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    min-width: 220px;
+  }
+
+  /* Animated dots ring */
+  .sc-loader-ring {
+    width: 44px; height: 44px;
+    position: relative;
+  }
+  .sc-loader-ring::before,
+  .sc-loader-ring::after {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: 50%;
+  }
+  .sc-loader-ring::before {
+    border: 2px solid #1e1e1e;
+  }
+  .sc-loader-ring::after {
+    border: 2px solid transparent;
+    border-top-color: #aaa;
+    border-right-color: #555;
+    animation: sc-spin 0.8s cubic-bezier(0.4,0,0.2,1) infinite;
+  }
+  @keyframes sc-spin { to { transform: rotate(360deg); } }
+
+  /* Pulsing dots */
+  .sc-loader-dots {
+    display: flex; gap: 5px; align-items: center;
+  }
+  .sc-loader-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #444;
+    animation: sc-dot-pulse 1.2s ease-in-out infinite;
+  }
+  .sc-loader-dot:nth-child(2) { animation-delay: 0.2s; }
+  .sc-loader-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes sc-dot-pulse {
+    0%, 80%, 100% { opacity: 0.2; transform: scale(0.85); }
+    40% { opacity: 1; transform: scale(1.2); }
+  }
+
+  .sc-loader-text {
+    font-family: monospace;
+    font-size: 11px;
+    color: #666;
+    letter-spacing: 0.08em;
+    text-align: center;
+  }
+  .sc-loader-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    color: #999;
+    font-weight: 600;
+  }
+
+  /* Button generating state */
+  .btn-generating {
+    position: relative;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  .btn-generating::after {
+    content: '';
+    position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+    animation: sc-shimmer 1.2s ease-in-out infinite;
+  }
+  @keyframes sc-shimmer {
+    0% { left: -60%; }
+    100% { left: 140%; }
+  }
+
+  /* Gen bar pulse during generation */
+  .fs-gen-bar.generating {
+    border-color: #2a2a2a;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.03);
+    animation: sc-bar-pulse 2s ease-in-out infinite;
+  }
+  @keyframes sc-bar-pulse {
+    0%, 100% { box-shadow: 0 8px 40px rgba(0,0,0,0.8), 0 0 12px rgba(255,255,255,0.02); }
+    50% { box-shadow: 0 8px 40px rgba(0,0,0,0.8), 0 0 24px rgba(255,255,255,0.05); }
+  }
+  .form-section { background: #0f0f0f; border: 1px solid #1a1a1a; border-radius: 12px; padding: 20px; margin-bottom: 14px; }
+  .form-section-title { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 16px; }
+  .form-label { font-size: 13px; color: #888; margin-bottom: 8px; display: block; font-weight: 500; }
+
+  /* ── PROJECTS ── */
+  .projects-tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid #1e1e1e; }
+  .projects-tab { padding: 9px 16px; font-size: 12px; font-weight: 500; color: #555; cursor: pointer; border-radius: 6px 6px 0 0; border: 1px solid transparent; border-bottom: none; transition: all 0.2s; font-family: 'DM Sans', sans-serif; background: transparent; outline: none; margin-bottom: -1px; }
+  .projects-tab.active { color: #e8e8e8; background: #0f0f0f; border-color: #1a1a1a; border-bottom-color: #0f0f0f; }
+  .projects-tab:hover:not(.active) { color: #888; }
+  .projects-list { display: none; }
+  .projects-list.active { display: block; }
+  .project-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; background: #0f0f0f; border: 1px solid #1a1a1a; border-radius: 8px; margin-bottom: 8px; transition: border-color 0.2s; cursor: pointer; }
+  .project-item:hover { border-color: #222; }
+  .project-item-left { display: flex; align-items: center; gap: 12px; }
+  .project-dot { width: 8px; height: 8px; border-radius: 50%; background: #222; flex-shrink: 0; }
+  .project-name { font-size: 13px; color: #e8e8e8; }
+  .project-date { font-size: 11px; color: #555; }
+  .project-empty { text-align: center; padding: 48px 20px; color: #555; font-size: 13px; }
+
+  /* ── LOCATION PROMPT CARDS ── */
+  .loc-card {
+    background: #0a0a0a; border: 1px solid #1e1e1e;
+    border-radius: 8px; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .loc-card:hover { border-color: #2a2a2a; }
+  .loc-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; background: #111; border-bottom: 1px solid #1a1a1a;
+  }
+  .loc-card-num {
+    font-family: monospace; font-size: 9px; color: #444;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .loc-card-name {
+    font-family: 'Syne', sans-serif; font-size: 11px;
+    font-weight: 600; color: #aaa; flex: 1; margin: 0 8px;
+  }
+  .loc-card-body {
+    padding: 10px 12px;
+    font-family: monospace; font-size: 11px;
+    color: #93c5fd; line-height: 1.7;
+    direction: ltr; text-align: left;
+  }
+  .loc-card-footer {
+    padding: 6px 12px 8px;
+    display: flex; justify-content: flex-end;
+    border-top: 1px solid #141414;
+  }
+  @media (max-width: 700px) {
+    #fs-loc-cards { grid-template-columns: 1fr !important; }
+  }
+
+  /* ── STORYBOARD GRID ── */
+  .sb-card {
+    background: #0a0a0a; border: 1px solid #1e1e1e;
+    border-radius: 10px; overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .sb-card:hover { border-color: #2a2a2a; }
+  .sb-card-header {
+    padding: 8px 12px;
+    background: #111;
+    border-bottom: 1px solid #1a1a1a;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sb-shot-num {
+    font-family: 'Syne', sans-serif; font-size: 10px;
+    color: #555; font-weight: 700; letter-spacing: 0.08em;
+  }
+  .sb-shot-name {
+    font-family: 'Syne', sans-serif; font-size: 12px;
+    color: #ccc; font-weight: 600; flex: 1; margin: 0 8px;
+  }
+  .sb-shot-dur {
+    font-family: monospace; font-size: 10px; color: #444;
+  }
+  .sb-card-meta {
+    padding: 8px 12px;
+    display: flex; gap: 6px; flex-wrap: wrap;
+    border-bottom: 1px solid #141414;
+  }
+  .sb-tag {
+    font-family: monospace; font-size: 9px; color: #555;
+    background: #111; border: 1px solid #1e1e1e;
+    border-radius: 4px; padding: 2px 6px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .sb-tag.mood { color: #777; border-color: #222; }
+  .sb-card-prompt {
+    padding: 10px 12px;
+    font-family: 'DM Sans', sans-serif; font-size: 12px;
+    color: #888; line-height: 1.65; direction: ltr; text-align: left;
+  }
+  .sb-card-neg {
+    padding: 6px 12px 10px;
+    font-family: monospace; font-size: 10px;
+    color: #3a3a3a; direction: ltr; text-align: left;
+  }
+  .sb-card-chars {
+    padding: 6px 12px;
+    font-family: monospace; font-size: 10px;
+    color: #555; direction: ltr; text-align: left;
+    border-top: 1px solid #141414;
+  }
+  .sb-copy-btn {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-family: monospace; font-size: 9px; color: #444;
+    background: transparent; border: 1px solid #1e1e1e;
+    border-radius: 4px; padding: 3px 8px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .sb-copy-btn:hover { color: #888; border-color: #2a2a2a; }
+  @media (max-width: 700px) {
+    #fs-storyboard-grid { grid-template-columns: 1fr !important; }
+  }
+  .fs-style-box {
+    width: 100%; height: 110px;
+    background: #0a0a0a; border: 2px dashed #222;
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: border-color 0.2s, background 0.2s;
+    position: relative; overflow: hidden;
+  }
+  .fs-style-box:hover { border-color: #333; background: #0f0f0f; }
+  .fs-style-box.selected { border-style: solid; border-color: #333; }
+  .fs-style-box-placeholder { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .fs-style-box-plus { font-size: 18px; color: #333; line-height: 1; }
+  .fs-style-box-label { font-size: 9px; font-family: monospace; color: #444; letter-spacing: 0.5px; text-align: center; }
+  .fs-style-box img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+  .fs-style-box-overlay {
+    position: absolute; inset: 0; border-radius: 8px;
+    background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 45%);
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 7px 9px;
+  }
+  .fs-style-box-name { font-family: 'Syne', sans-serif; font-size: 10px; color: #fff; letter-spacing: 0.5px; }
+  .fs-style-box-change { font-size: 9px; font-family: monospace; color: #bbb; background: rgba(0,0,0,0.55); border: 1px solid #333; border-radius: 3px; padding: 2px 6px; cursor: pointer; transition: all 0.15s; }
+  .fs-style-box-change:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+  /* Modal */
+  .fs-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 2000; align-items: center; justify-content: center; }
+  .fs-modal-overlay.open { display: flex; }
+  .fs-modal { background: #0d0d0d; border: 1px solid #1e1e1e; border-radius: 14px; width: min(740px, 96vw); max-height: 82vh; display: flex; flex-direction: column; box-shadow: 0 24px 60px rgba(0,0,0,0.9); }
+  .fs-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 15px 20px; border-bottom: 1px solid #1a1a1a; }
+  .fs-modal-title { font-family: 'Syne', sans-serif; font-size: 12px; color: #888; letter-spacing: 0.12em; text-transform: uppercase; }
+  .fs-modal-close { width: 28px; height: 28px; border-radius: 50%; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #fca5a5; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .fs-modal-close:hover { background: rgba(239,68,68,0.22); }
+  .fs-modal-body { overflow-y: auto; overflow-x: hidden; padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; scrollbar-width: thin; scrollbar-color: #2a2a2a #0d0d0d; }
+  .fs-style-card { border-radius: 10px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: all 0.18s; background: #111; }
+  .fs-style-card:hover { border-color: #333; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+  .fs-style-card.selected { border-color: #555; box-shadow: 0 0 0 3px rgba(255,255,255,0.06); }
+  .fs-style-card-img-wrap { width: 100%; height: 130px; overflow: hidden; background: #0a0a0a; position: relative; display: flex; align-items: center; justify-content: center; }
+  .fs-style-card-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; display: block; }
+  .fs-style-card:hover .fs-style-card-img { transform: scale(1.05); }
+  .fs-style-card-fallback-emoji { font-size: 48px; line-height: 1; opacity: 0; transition: opacity 0.2s; position: relative; z-index: 1; pointer-events: none; }
+  .fs-style-card-no-img { width: 100%; height: 130px; background: linear-gradient(135deg, #111, #161616); display: flex; align-items: center; justify-content: center; font-size: 52px; }
+  .fs-style-card-label { padding: 11px 12px 13px; text-align: center; background: #0d0d0d; border-top: 1px solid #1a1a1a; }
+  .fs-style-card-en { font-size: 14px; font-weight: 700; color: #e8e8e8; font-family: 'Syne', sans-serif; display: block; letter-spacing: 0.02em; }
+  .fs-style-card-ar { font-size: 12px; color: #666; font-family: 'DM Sans', sans-serif; display: block; margin-top: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #1e1e1e; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2a2a2a; }
+
+  /* nav tooltip */
+  .nav-item { position: relative; }
+  #sidebar.collapsed .nav-item:hover::after { content: attr(data-tooltip); position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%); background: #161616; border: 1px solid #222; color: #e8e8e8; font-size: 12px; padding: 5px 10px; border-radius: 6px; white-space: nowrap; pointer-events: none; z-index: 100; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════
+     SIDEBAR
+══════════════════════════════ -->
+<div id="sidebar">
+
+  <!-- Logo / Toggle -->
+  <div class="sidebar-logo" onclick="toggleSidebar()">
+    <div class="logo-icon">
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 4C8.477 4 4 8.477 4 14s4.477 10 10 10 10-4.477 10-10S19.523 4 14 4z" stroke="#888" stroke-width="1.5"/>
+        <path d="M9 14c0-2.761 2.239-5 5-5" stroke="#ccc" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M19 14c0 2.761-2.239 5-5 5" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <span class="logo-text">SceneCraft</span>
+  </div>
+
+  <!-- Nav Items -->
+  <nav class="sidebar-nav">
+    <div class="nav-item active" data-page="home" data-tooltip="Home" onclick="navigate('home', this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 01-1 1H4a1 1 0 01-1-1V9.5z"/>
+          <path d="M9 21V12h6v9"/>
+        </svg>
+      </span>
+      <span class="nav-label">Home</span>
+    </div>
+
+    <div class="nav-item" data-page="fullscene" data-tooltip="Full Scene Prompt" onclick="navigate('fullscene', this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <path d="M8 21h8M12 17v4"/>
+        </svg>
+      </span>
+      <span class="nav-label">Full Scene Prompt</span>
+    </div>
+
+    <div class="nav-item" data-page="story" data-tooltip="Story Prompt" onclick="navigate('story', this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+        </svg>
+      </span>
+      <span class="nav-label">Story Prompt</span>
+    </div>
+
+    <div class="nav-item" data-page="character" data-tooltip="Character Prompt" onclick="navigate('character', this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="7" r="4"/>
+          <path d="M5.5 21a8.38 8.38 0 0113 0"/>
+        </svg>
+      </span>
+      <span class="nav-label">Character Prompt</span>
+    </div>
+
+    <div class="nav-item" data-page="scene" data-tooltip="Scene Prompt" onclick="navigate('scene', this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+        </svg>
+      </span>
+      <span class="nav-label">Scene Prompt</span>
+    </div>
+
+    <div class="nav-item" data-page="video" data-tooltip="Video Prompt" onclick="navigate('video', this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="6" width="14" height="12" rx="2"/>
+          <path d="M22 8l-6 4 6 4V8z"/>
+        </svg>
+      </span>
+      <span class="nav-label">Video Prompt</span>
+    </div>
+
+    <div class="nav-item" data-page="projects" data-tooltip="Projects" onclick="navigate('projects', this)">
+      <span class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 7a2 2 0 012-2h4l2 3H4a2 2 0 00-2 2v9a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2h-8L10 4H4"/>
+          <path d="M2 10h20"/>
+        </svg>
+      </span>
+      <span class="nav-label">Projects</span>
+    </div>
+  </nav>
+
+  <!-- User -->
+  <div class="sidebar-user">
+    <div class="user-avatar">A</div>
+    <div class="user-info">
+      <div class="user-name">Hello, Ahmed</div>
+      <div class="user-plan">Pro</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     MAIN CONTENT
+══════════════════════════════ -->
+<div id="main">
+
+  <!-- ── HOME ── -->
+  <div id="page-home" class="page active">
+    <div class="home-welcome">
+      <h1>Good to see you, Ahmed</h1>
+      <p>Your creative toolkit for crafting cinematic stories, characters, and scenes — powered by AI.</p>
+      <div class="home-tools-grid">
+        <div class="home-tool-card" onclick="navigate('fullscene')">
+          <div class="home-tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div class="home-tool-name">Full Scene</div>
+          <div class="home-tool-desc">Complete scene package with all prompts</div>
+        </div>
+        <div class="home-tool-card" onclick="navigate('story')">
+          <div class="home-tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          </div>
+          <div class="home-tool-name">Story Prompt</div>
+          <div class="home-tool-desc">Generate professional story narratives</div>
+        </div>
+        <div class="home-tool-card" onclick="navigate('character')">
+          <div class="home-tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="7" r="4"/><path d="M5.5 21a8.38 8.38 0 0113 0"/></svg>
+          </div>
+          <div class="home-tool-name">Character Prompt</div>
+          <div class="home-tool-desc">Craft detailed character descriptions</div>
+        </div>
+        <div class="home-tool-card" onclick="navigate('scene')">
+          <div class="home-tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          </div>
+          <div class="home-tool-name">Scene Prompt</div>
+          <div class="home-tool-desc">Design locations and environments</div>
+        </div>
+        <div class="home-tool-card" onclick="navigate('video')">
+          <div class="home-tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 8l-6 4 6 4V8z"/></svg>
+          </div>
+          <div class="home-tool-name">Video Prompt</div>
+          <div class="home-tool-desc">Final video production prompts</div>
+        </div>
+        <div class="home-tool-card" onclick="navigate('projects')">
+          <div class="home-tool-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+          </div>
+          <div class="home-tool-name">Projects</div>
+          <div class="home-tool-desc">Browse your saved work</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FULL SCENE PROMPT ── -->
+
+  <!-- ── FULL SCENE PROMPT ── -->
+  <div id="page-fullscene" class="page">
+    <div class="page-header">
+      <div class="page-title">Full Scene Prompt</div>
+      <div class="page-subtitle">Build your complete scene — story, characters, locations, shots — then generate the final video prompt.</div>
+    </div>
+
+    <div class="fs-wrap">
+
+      <!-- 0. STORY INPUT -->
+      <div class="fs-story-input-section">
+        <div class="fs-section-header" onclick="fsSectionToggle(this,'fs-story-input-body')">
+          <div class="fs-section-icon">✍️</div>
+          <div class="fs-section-label">
+            <div class="fs-section-title-en">STORY INPUT</div>
+            <div class="fs-section-title-main">Story Input — أدخل قصتك</div>
+          </div>
+          <span class="fs-chevron open">▼</span>
+        </div>
+        <div class="fs-section-body" id="fs-story-input-body">
+          <div class="fs-field">
+            <div class="fs-field-label"><span class="fs-field-label-ar">اكتب قصتك</span><span class="sep">|</span>Your Story</div>
+            <textarea id="fs-raw-story" rows="4" placeholder="اكتب قصتك هنا بأي تفاصيل تريدها — Write your story idea in any detail..."></textarea>
+          </div>
+          <button class="btn-analyze" id="fs-rephrase-btn" onclick="fsRephraseStory(this)">
+            <span class="fs-char-analyzing-ring" id="fs-rephrase-ring" style="display:none"></span>
+            ✦ صياغة احترافية للقصة — Rephrase Story
+          </button>
+          <div id="fs-story-refined-wrap" style="display:none" class="fs-field">
+            <div class="fs-field-label"><span class="fs-field-label-ar">القصة المصاغة — يمكنك التعديل عليها</span><span class="sep">|</span>Refined Story</div>
+            <textarea id="fs-refined-story" rows="5" placeholder="ستظهر هنا القصة المصاغة..." style="border-color:#2a2a2a;"></textarea>
+          </div>
+          <div class="fs-grid2" id="fs-story-settings" style="display:none">
+            <div class="fs-field">
+              <div class="fs-field-label"><span class="fs-field-label-ar">عدد اللقطات</span><span class="sep">|</span>Shots</div>
+              <select id="fs-shots-count" onchange="fsCheckAutofillReady()">
+                <option value="" disabled selected>حدد عدد اللقطات</option>
+                <option value="2">2 لقطات</option><option value="3">3 لقطات</option><option value="4">4 لقطات</option>
+                <option value="5">5 لقطات</option><option value="6">6 لقطات</option><option value="8">8 لقطات</option>
+                <option value="10">10 لقطات</option><option value="12">12 لقطة</option>
+              </select>
+            </div>
+            <div class="fs-field">
+              <div class="fs-field-label"><span class="fs-field-label-ar">المدة الكلية</span><span class="sep">|</span>Total Duration</div>
+              <select id="fs-total-dur" onchange="fsCheckAutofillReady()">
+                <option value="" disabled selected>حدد المدة</option>
+                <option value="5">5 ثوانٍ</option><option value="6">6 ثوانٍ</option><option value="8">8 ثوانٍ</option>
+                <option value="10">10 ثوانٍ</option><option value="12">12 ثانية</option><option value="15">15 ثانية</option>
+              </select>
+            </div>
+          </div>
+          <div class="fs-loading" id="fs-fill-loading"><div class="fs-loading-ring"></div><span id="fs-fill-loading-text">⏳ يحلل القصة ويعبئ النموذج...</span></div>
+          <button class="btn-analyze" id="fs-autofill-btn" style="display:none;background:#141414;border-color:#252525;opacity:0.4;cursor:not-allowed;" disabled onclick="fsAutoFill(this)">
+            ✦ تعبئة النموذج تلقائياً — Auto Fill Form
+          </button>
+        </div>
+      </div>
+
+      <!-- 1. SCENE INFO -->
+      <div class="fs-section">
+        <div class="fs-section-header" onclick="fsSectionToggle(this,'fs-scene-info-body')">
+          <div class="fs-section-icon">🎬</div>
+          <div class="fs-section-label">
+            <div class="fs-section-title-en">SCENE INFORMATION</div>
+            <div class="fs-section-title-main">Scene Info — معلومات المشهد</div>
+          </div>
+          <span class="fs-chevron">▼</span>
+        </div>
+        <div class="fs-section-body collapsed" id="fs-scene-info-body">
+          <div class="fs-field">
+            <div class="fs-field-label"><span class="fs-field-label-ar">عنوان المشهد</span><span class="sep">|</span>Scene Title</div>
+            <input type="text" id="fs-scene-title" placeholder="اكتب عنوان المشهد هنا">
+          </div>
+          <div class="fs-field">
+            <div class="fs-field-label"><span class="fs-field-label-ar">ملخص القصة</span><span class="sep">|</span>Story Summary</div>
+            <textarea id="fs-summary" rows="3" placeholder="اكتب ملخصاً موجزاً للمشهد..."></textarea>
+          </div>
+          <div class="fs-field">
+            <div class="fs-field-label"><span class="fs-field-label-ar">النوع</span><span class="sep">|</span>Genre</div>
+            <select id="fs-genre">
+              <option value="" disabled selected>اختر نوع المشهد</option>
+              <option value="Science Fiction">Science Fiction — خيال علمي</option>
+              <option value="Adventure">Adventure — مغامرة</option>
+              <option value="Drama">Drama — دراما</option>
+              <option value="Romance">Romance — رومانسي</option>
+              <option value="Action">Action — أكشن</option>
+              <option value="Thriller">Thriller — إثارة</option>
+              <option value="Comedy">Comedy — كوميدي</option>
+              <option value="Horror">Horror — رعب</option>
+            </select>
+          </div>
+          <div class="fs-grid3">
+            <div class="fs-field">
+              <div class="fs-field-label"><span class="fs-field-label-ar">المدة</span><span class="sep">|</span>Duration</div>
+              <select id="fs-duration">
+                <option value="" disabled selected>اختر المدة</option>
+                <option>3 secs</option><option>5 secs</option><option>6 secs</option>
+                <option>8 secs</option><option>10 secs</option><option>15 secs</option>
+              </select>
+            </div>
+            <div class="fs-field">
+              <div class="fs-field-label"><span class="fs-field-label-ar">البيئة</span><span class="sep">|</span>Environment</div>
+              <select id="fs-env">
+                <option value="" disabled selected>اختر البيئة</option>
+                <option value="Indoor">Indoor — داخلي</option>
+                <option value="Outdoor">Outdoor — خارجي</option>
+              </select>
+            </div>
+            <div class="fs-field">
+              <div class="fs-field-label"><span class="fs-field-label-ar">الوقت</span><span class="sep">|</span>Time</div>
+              <select id="fs-time">
+                <option value="" disabled selected>اختر الوقت</option>
+                <option value="Day">Day — نهار</option><option value="Sunset">Sunset — غروب</option>
+                <option value="Night">Night — ليل</option><option value="Dawn">Dawn — فجر</option>
+              </select>
+            </div>
+          </div>
+          <!-- Visual Style + Location row -->
+          <div class="fs-grid2">
+            <div class="fs-field">
+              <div class="fs-field-label"><span class="fs-field-label-ar">الاستايل البصري</span><span class="sep">|</span>Visual Style</div>
+              <input type="hidden" id="fs-style">
+              <!-- Style picker box -->
+              <div class="fs-style-box" id="fs-style-box" onclick="fsOpenStyleModal()">
+                <div class="fs-style-box-placeholder">
+                  <div class="fs-style-box-plus">＋</div>
+                  <div class="fs-style-box-label">اختر الاستايل البصري</div>
+                </div>
+              </div>
+            </div>
+            <div class="fs-field">
+              <div class="fs-field-label"><span class="fs-field-label-ar">الموقع</span><span class="sep">|</span>Location</div>
+              <input type="text" id="fs-location" placeholder="مثال: مول فاخر، صحراء، ميناء...">
+            </div>
+          </div>
+          <div id="fs-custom-style-wrap" style="display:none;" class="fs-field">
+            <div class="fs-field-label"><span class="fs-field-label-ar">استايل مخصص</span><span class="sep">|</span>Custom Style</div>
+            <input type="text" id="fs-custom-style" placeholder="اكتب الاستايل البصري المخصص...">
+          </div>
+
+          <!-- Style Modal -->
+          <div class="fs-modal-overlay" id="fs-style-modal" onclick="if(event.target===this)fsCloseStyleModal()">
+            <div class="fs-modal">
+              <div class="fs-modal-header">
+                <span class="fs-modal-title">VISUAL STYLE — الاستايل البصري</span>
+                <button class="fs-modal-close" onclick="fsCloseStyleModal()">✕</button>
+              </div>
+              <div class="fs-modal-body" id="fs-style-modal-body"></div>
+            </div>
+          </div>
+          <!-- Location Prompt -->
+          <div class="fs-field">
+            <div class="fs-field-label"><span class="fs-field-label-ar">برومبتات مراجع المواقع</span><span class="sep">|</span>Location Reference Prompts</div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+              <button class="btn-gen-cprompt" onclick="fsGenerateLocationPrompt(this)">
+                ⚡ توليد برومبتات المواقع
+              </button>
+            </div>
+            <!-- Unified grid prompt box -->
+            <div id="fs-loc-grid-prompt-wrap" style="display:none;">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                <div style="font-family:monospace;font-size:10px;color:#555;letter-spacing:0.1em;text-transform:uppercase;">✦ Grid Image Prompt — برومبت صورة الشبكة الموحّد</div>
+                <button class="sb-copy-btn" style="font-size:11px;padding:5px 12px;" onclick="fsCopyGridPrompt(this)">⎘ نسخ البرومبت</button>
+              </div>
+              <textarea id="fs-loc-grid-prompt-text" class="output" rows="5" readonly
+                style="width:100%;font-size:11px;color:#93c5fd;line-height:1.7;direction:ltr;text-align:left;border-color:#1e2a3a;background:#080c12;"
+                placeholder="سيظهر هنا برومبت الشبكة الموحّد..."></textarea>
+              <div style="margin-top:8px;font-size:11px;color:#444;font-family:'DM Sans',sans-serif;">
+                💡 انسخ هذا البرومبت وضعه في <strong style="color:#666;">Midjourney / FLUX / Stable Diffusion</strong> للحصول على صورة شبكة مرقّمة
+              </div>
+            </div>
+            <!-- hidden storage -->
+            <input type="hidden" id="fs-loc-prompt">
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. CHARACTERS -->
+      <div class="fs-section">
+        <div class="fs-section-header" onclick="fsSectionToggle(this,'fs-chars-body')">
+          <div class="fs-section-icon">👤</div>
+          <div class="fs-section-label">
+            <div class="fs-section-title-en">CHARACTERS</div>
+            <div class="fs-section-title-main">Characters — شخصيات المشهد</div>
+          </div>
+          <span class="fs-chevron">▼</span>
+        </div>
+        <div class="fs-section-body collapsed" id="fs-chars-body">
+          <div class="fs-chars-container" id="fs-chars-container"></div>
+          <button class="btn-add-card" onclick="fsAddChar()">＋ إضافة شخصية — Add Character</button>
+        </div>
+      </div>
+
+      <!-- 3. SHOTS -->
+      <div class="fs-section">
+        <div class="fs-section-header" onclick="fsSectionToggle(this,'fs-shots-body')">
+          <div class="fs-section-icon">🎥</div>
+          <div class="fs-section-label">
+            <div class="fs-section-title-en">SHOTS</div>
+            <div class="fs-section-title-main">Shots — لقطات المشهد</div>
+          </div>
+          <span class="fs-chevron">▼</span>
+        </div>
+        <div class="fs-section-body collapsed" id="fs-shots-body">
+          <div class="fs-shots-container" id="fs-shots-container"></div>
+          <button class="btn-add-card" onclick="fsAddShot()">＋ إضافة لقطة — Add Shot</button>
+        </div>
+      </div>
+
+      <div class="fs-error-box" id="fs-error-box"></div>
+
+      <!-- GEN BAR -->
+      <div class="fs-gen-bar">
+        <button class="fs-btn-generate" id="fs-gen-btn" onclick="fsGenerate()">✦ Generate Full Scene Prompt — توليد البرومبت</button>
+        <button class="fs-btn-stop show" id="fs-stop-btn" style="display:none;" onclick="fsStopGenerate()">⊗ إيقاف</button>
+        <button class="fs-btn-save-proj" onclick="fsSaveProject()">💾 حفظ</button>
+        <button class="fs-btn-clear" onclick="fsClearAll()">⊘ مسح</button>
+      </div>
+
+      <!-- OUTPUT -->
+      <div class="fs-output-section" id="fs-output-section">
+        <div class="fs-output-header">
+          <div class="fs-output-title">✦ FINAL VIDEO PROMPT</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="fs-btn-copy-out" onclick="fsClearOutput()" style="border-color:rgba(239,68,68,0.2);color:#fca5a5;">⊗ مسح الكل</button>
+          </div>
+        </div>
+
+        <!-- Final prompt -->
+        <div id="fs-final-prompt-wrap" style="padding:18px 18px 0;">
+          <div id="fs-final-prompt-text" style="font-family:monospace;font-size:12px;color:#93c5fd;line-height:1.8;white-space:pre-wrap;direction:ltr;text-align:left;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:16px;"></div>
+          <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+            <button class="fs-btn-copy-out" onclick="fsCopyFinalPrompt()">⎘ نسخ البرومبت</button>
+          </div>
+        </div>
+
+        <!-- Seedance 2.0 prompt -->
+        <div id="fs-seedance-prompt-wrap" style="display:none;padding:18px 18px 18px;">
+          <div style="border-top:1px solid #1a1a1a;padding-top:16px;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+            <span style="font-family:monospace;font-size:10px;color:#555;letter-spacing:0.12em;text-transform:uppercase;">✦ Seedance 2.0 Prompt</span>
+            <span style="font-family:monospace;font-size:9px;color:#3a3a3a;background:#111;border:1px solid #1e1e1e;border-radius:4px;padding:2px 7px;">max 5000 words</span>
+          </div>
+          <div id="fs-seedance-prompt-text" style="font-family:monospace;font-size:12px;color:#86efac;line-height:1.8;white-space:pre-wrap;direction:ltr;text-align:left;background:#0a0a0a;border:1px solid #1a1a1a;border-radius:8px;padding:16px;"></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px;">
+            <button class="fs-btn-copy-out" onclick="fsClearSeedancePrompt()" style="border-color:rgba(239,68,68,0.2);color:#fca5a5;">⊗ مسح</button>
+            <button class="fs-btn-copy-out" onclick="fsCopySeedancePrompt()">⎘ نسخ برومبت Seedance</button>
+          </div>
+        </div>
+
+        <!-- Hidden grid (kept for compatibility) -->
+        <div id="fs-storyboard-grid" style="display:none;"></div>
+        <div class="fs-output-body" id="fs-output-body" style="display:none;"></div>
+      </div>
+
+    </div><!-- /fs-wrap -->
+  </div>
+
+  <div id="page-story" class="page">
+    <div class="page-header">
+      <div class="page-title">Story Prompt</div>
+      <div class="page-subtitle">Write your idea and generate a professional story narrative and prompt.</div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Your Story Idea</div>
+      <label class="form-label">Describe your story or scene concept</label>
+      <textarea id="story-input" class="large" placeholder="Write your story idea here... For example: A lone detective walks through a rainy cyberpunk city at night, searching for clues in a neon-lit alley..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-generate" onclick="generateAI('story-input','story-output','professional_story',this)">
+          <span class="spinner" id="sp-story"></span> Generate Professional Story
+        </button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Professional Story</div>
+      <div class="output-header">
+        <span class="form-label" style="margin:0">Generated Story</span>
+        <button class="btn btn-copy" onclick="copyText('story-output')">Copy</button>
+      </div>
+      <textarea id="story-output" class="output large" readonly placeholder="Your professional story will appear here..."></textarea>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-prompt" onclick="generateAI('story-output','story-prompt-output','story_prompt',this)">
+          <span class="spinner" id="sp-story-prompt"></span> Generate Story Prompt
+        </button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Story Prompt</div>
+      <div class="output-header">
+        <span class="form-label" style="margin:0">Story Sheet Prompt</span>
+        <button class="btn btn-copy" onclick="copyText('story-prompt-output')">Copy</button>
+      </div>
+      <textarea id="story-prompt-output" class="output" readonly placeholder="Story sheet prompt will appear here..."></textarea>
+      <button class="btn btn-save" onclick="saveProject('story')">Save Project</button>
+    </div>
+  </div>
+
+  <!-- ── CHARACTER PROMPT ── -->
+  <div id="page-character" class="page">
+    <div class="page-header">
+      <div class="page-title">Character Prompt</div>
+      <div class="page-subtitle">Describe your character or upload a reference image to generate a detailed profile and prompt.</div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Character Description</div>
+      <label class="form-label">Describe your character</label>
+      <textarea id="char-input" class="large" placeholder="Describe your character's appearance, personality, role... For example: A middle-aged woman with silver hair, piercing green eyes, wearing a long dark coat. She carries a mysterious air of authority..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-generate" onclick="generateAI('char-input','char-output','professional_character',this)">
+          <span class="spinner" id="sp-char"></span> Generate Professional Description
+        </button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Reference Image (Optional)</div>
+      <div class="upload-area" id="char-upload-area">
+        <input type="file" accept="image/*" onchange="handleImageUpload(event,'char-preview','char-image-data')" />
+        <div class="upload-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        </div>
+        <div class="upload-text">Click or drag to upload reference image</div>
+      </div>
+      <div class="upload-preview" id="char-preview">
+        <img id="char-preview-img" src="" alt="Preview" />
+      </div>
+      <input type="hidden" id="char-image-data" />
+      <button class="btn btn-generate" id="char-image-btn" style="display:none" onclick="generateFromImage('char-image-data','char-output','character_from_image',this)">
+        <span class="spinner" id="sp-char-img"></span> Describe from Image
+      </button>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Professional Character Description</div>
+      <div class="output-header">
+        <span class="form-label" style="margin:0">Generated Description</span>
+        <button class="btn btn-copy" onclick="copyText('char-output')">Copy</button>
+      </div>
+      <textarea id="char-output" class="output large" readonly placeholder="Professional character description will appear here..."></textarea>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-prompt" onclick="generateAI('char-output','char-prompt-output','character_prompt',this)">
+          <span class="spinner" id="sp-char-prompt"></span> Generate Character Prompt
+        </button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Character Sheet Prompt</div>
+      <div class="output-header">
+        <span class="form-label" style="margin:0">Character Prompt</span>
+        <button class="btn btn-copy" onclick="copyText('char-prompt-output')">Copy</button>
+      </div>
+      <textarea id="char-prompt-output" class="output" readonly placeholder="Character sheet prompt will appear here..."></textarea>
+      <button class="btn btn-save" onclick="saveProject('character')">Save Project</button>
+    </div>
+  </div>
+
+  <!-- ── SCENE PROMPT ── -->
+  <div id="page-scene" class="page">
+    <div class="page-header">
+      <div class="page-title">Scene Prompt</div>
+      <div class="page-subtitle">Define your locations and generate professional scene descriptions and prompts.</div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Scene Locations</div>
+      <label class="form-label">Describe the locations in your scene</label>
+      <textarea id="scene-input" class="large" placeholder="List and describe the locations... For example: A crumbling rooftop overlooking a foggy harbor at dawn. Rusty water towers, scattered pigeons, distant foghorns..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-generate" onclick="generateAI('scene-input','scene-output','professional_scene',this)">
+          <span class="spinner" id="sp-scene"></span> Generate Scene Description
+        </button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Reference Image (Optional)</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" onchange="handleImageUpload(event,'scene-preview','scene-image-data')" />
+        <div class="upload-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        </div>
+        <div class="upload-text">Upload a reference image for the scene location</div>
+      </div>
+      <div class="upload-preview" id="scene-preview">
+        <img id="scene-preview-img" src="" alt="Preview" />
+      </div>
+      <input type="hidden" id="scene-image-data" />
+      <button class="btn btn-generate" id="scene-image-btn" style="display:none" onclick="generateFromImage('scene-image-data','scene-output','scene_from_image',this)">
+        <span class="spinner" id="sp-scene-img"></span> Describe Location from Image
+      </button>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Professional Scene Description</div>
+      <div class="output-header">
+        <span class="form-label" style="margin:0">Generated Description</span>
+        <button class="btn btn-copy" onclick="copyText('scene-output')">Copy</button>
+      </div>
+      <textarea id="scene-output" class="output large" readonly placeholder="Professional scene description will appear here..."></textarea>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-prompt" onclick="generateAI('scene-output','scene-prompt-output','scene_prompt',this)">
+          <span class="spinner" id="sp-scene-prompt"></span> Generate Scene Prompt
+        </button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Scene Location Prompt</div>
+      <div class="output-header">
+        <span class="form-label" style="margin:0">Scene Prompt</span>
+        <button class="btn btn-copy" onclick="copyText('scene-prompt-output')">Copy</button>
+      </div>
+      <textarea id="scene-prompt-output" class="output" readonly placeholder="Scene location prompt will appear here..."></textarea>
+      <button class="btn btn-save" onclick="saveProject('scene')">Save Project</button>
+    </div>
+  </div>
+
+  <!-- ── VIDEO PROMPT ── -->
+  <div id="page-video" class="page">
+    <div class="page-header">
+      <div class="page-title">Video Prompt</div>
+      <div class="page-subtitle">Generate scene-by-scene video prompts and the final production prompt.</div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Video Scene Brief</div>
+      <label class="form-label">Describe your video concept and scenes</label>
+      <textarea id="video-input" class="large" placeholder="Describe the video you want to produce — scenes, mood, style, pacing... For example: A cinematic opening showing a detective arriving at a crime scene. Dark and rainy. The camera starts aerial, slowly descending..."></textarea>
+      <div class="btn-row">
+        <button class="btn btn-generate" onclick="generateAI('video-input','video-scenes-output','video_scenes',this)">
+          <span class="spinner" id="sp-video-scenes"></span> Generate Scene Prompts
+        </button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Scene-by-Scene Prompts</div>
+      <div class="output-header">
+        <span class="form-label" style="margin:0">Video Scenes</span>
+        <button class="btn btn-copy" onclick="copyText('video-scenes-output')">Copy</button>
+      </div>
+      <textarea id="video-scenes-output" class="output large" readonly placeholder="Scene-by-scene prompts will appear here..."></textarea>
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn btn-prompt" onclick="generateAI('video-scenes-output','video-final-output','final_video_prompt',this)">
+          <span class="spinner" id="sp-video-final"></span> Generate Final Video Prompt
+        </button>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">Final Video Prompt</div>
+      <div class="output-header">
+        <span class="form-label" style="margin:0">Production Prompt</span>
+        <button class="btn btn-copy" onclick="copyText('video-final-output')">Copy</button>
+      </div>
+      <textarea id="video-final-output" class="output large" readonly placeholder="Final video production prompt will appear here..."></textarea>
+      <button class="btn btn-save" onclick="saveProject('video')">Save Project</button>
+    </div>
+  </div>
+
+  <!-- ── PROJECTS ── -->
+  <div id="page-projects" class="page">
+    <div class="page-header">
+      <div class="page-title">Projects</div>
+      <div class="page-subtitle">All your saved work, organized by type.</div>
+    </div>
+
+    <div class="projects-tabs">
+      <button class="projects-tab active" onclick="switchProjectTab('fullscene',this)">Full Scene</button>
+      <button class="projects-tab" onclick="switchProjectTab('story',this)">Story</button>
+      <button class="projects-tab" onclick="switchProjectTab('character',this)">Character</button>
+      <button class="projects-tab" onclick="switchProjectTab('scene',this)">Scene</button>
+      <button class="projects-tab" onclick="switchProjectTab('video',this)">Video</button>
+    </div>
+
+    <div id="proj-fullscene" class="projects-list active">
+      <div class="project-empty">No Full Scene projects saved yet.</div>
+    </div>
+    <div id="proj-story" class="projects-list">
+      <div class="project-empty">No Story projects saved yet.</div>
+    </div>
+    <div id="proj-character" class="projects-list">
+      <div class="project-empty">No Character projects saved yet.</div>
+    </div>
+    <div id="proj-scene" class="projects-list">
+      <div class="project-empty">No Scene projects saved yet.</div>
+    </div>
+    <div id="proj-video" class="projects-list">
+      <div class="project-empty">No Video projects saved yet.</div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<div class="fs-toast" id="fs-toast"></div>
+
+<!-- ── GLOBAL LOADING OVERLAY ── -->
+<div class="sc-loading-overlay" id="sc-loading-overlay">
+  <div class="sc-loader-box">
+    <div class="sc-loader-ring"></div>
+    <div class="sc-loader-label" id="sc-loader-label">Generating...</div>
+    <div class="sc-loader-dots">
+      <div class="sc-loader-dot"></div>
+      <div class="sc-loader-dot"></div>
+      <div class="sc-loader-dot"></div>
+    </div>
+    <div class="sc-loader-text" id="sc-loader-text">يرجى الانتظار...</div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════
+   GLOBAL LOADING OVERLAY HELPERS
+═══════════════════════════════════════ */
+function scShowLoading(label = 'Generating...', sub = 'يرجى الانتظار...') {
+  document.getElementById('sc-loader-label').textContent = label;
+  document.getElementById('sc-loader-text').textContent = sub;
+  document.getElementById('sc-loading-overlay').classList.add('show');
+}
+function scHideLoading() {
+  document.getElementById('sc-loading-overlay').classList.remove('show');
+}
+function scSetBtnLoading(btn, loading) {
+  if (!btn) return;
+  if (loading) {
+    btn.dataset.origText = btn.textContent;
+    btn.classList.add('btn-generating');
+    btn.disabled = true;
+    btn.textContent = btn.dataset.origText; // keep text, just disable
+  } else {
+    if (btn.dataset.origText !== undefined) btn.textContent = btn.dataset.origText;
+    btn.classList.remove('btn-generating');
+    btn.disabled = false;
+  }
+}
+
+/* ═══════════════════════════════════════
+   FULL SCENE STATE
+═══════════════════════════════════════ */
+let fsCharCount = 0, fsShotCount = 0;
+let fsGenerateAborted = false, fsGenerateActive = false;
+const fsCharImages = {};
+
+/* ═══════════════════════════════════════
+   STYLE OPTIONS DATA
+═══════════════════════════════════════ */
+const FS_STYLE_OPTIONS = [
+  { value: 'Cinematic Realism',  en: 'Cinematic Realism',  ar: 'واقعي سينمائي',      emoji: '🎞️', img: 'https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569_640.jpg' },
+  { value: 'Sketch Drawing',     en: 'Sketch Drawing',     ar: 'رسم سكتش',            emoji: '✏️', img: 'https://cdn.pixabay.com/photo/2017/07/10/23/43/question-mark-2492009_640.jpg' },
+  { value: 'Photorealistic',     en: 'Photorealistic',     ar: 'التصوير الفوتوغرافي',  emoji: '📷', img: 'https://cdn.pixabay.com/photo/2016/11/29/09/16/architecture-1868667_640.jpg' },
+  { value: 'Fantasy',            en: 'Fantasy',            ar: 'خيالي',               emoji: '🏰', img: 'https://cdn.pixabay.com/photo/2016/01/19/17/41/fantasy-1149673_640.jpg' },
+  { value: 'Plasticine People',  en: 'Plasticine People',  ar: 'الصلصال',             emoji: '🧸', img: 'https://cdn.pixabay.com/photo/2018/01/14/23/12/nature-3082832_640.jpg' },
+  { value: 'Inkprint',           en: 'Inkprint',           ar: 'حبر أسود',            emoji: '🖋️', img: 'https://cdn.pixabay.com/photo/2015/11/19/21/10/glasses-1052010_640.jpg' },
+  { value: 'Cartoon Fun',        en: 'Cartoon Fun',        ar: 'كرتون مرح',           emoji: '😄', img: 'https://cdn.pixabay.com/photo/2017/01/31/13/34/animal-2023924_640.png' },
+  { value: 'Dark Neoclassical',  en: 'Dark Neoclassical',  ar: 'كلاسيكي داكن',        emoji: '🎨', img: 'https://cdn.pixabay.com/photo/2020/04/08/09/08/architecture-5016989_640.jpg' },
+  { value: 'Craftmotion 3D',     en: 'Craftmotion 3D',     ar: 'تري دي صلصال',         emoji: '🧩', img: 'https://cdn.pixabay.com/photo/2016/07/27/10/44/fireworks-1544999_640.jpg' },
+  { value: 'Bold Flat',          en: 'Bold Flat',          ar: 'مسطح جريء',           emoji: '🔷', img: 'https://cdn.pixabay.com/photo/2015/09/09/19/56/auto-932716_640.jpg' },
+  { value: 'Anime',              en: 'Anime',              ar: 'أنيمي',               emoji: '⛩️', img: 'https://cdn.pixabay.com/photo/2020/05/02/11/26/japan-5120123_640.jpg' },
+  { value: 'Futuristic',         en: 'Futuristic',         ar: 'مستقبلي',             emoji: '🚀', img: 'https://cdn.pixabay.com/photo/2018/04/14/21/03/fantasy-3320785_640.jpg' },
+  { value: 'Mockup',             en: 'Mockup',             ar: 'موكب',                emoji: '📱', img: 'https://cdn.pixabay.com/photo/2016/02/19/11/19/office-1209640_640.jpg' },
+  { value: 'custom',             en: 'Custom Style',       ar: 'ستايل مخصص',          emoji: '✏️', img: null },
+];
+
+/* ═══════════════════════════════════════
+   STYLE MODAL
+═══════════════════════════════════════ */
+function fsOpenStyleModal() {
+  const body = document.getElementById('fs-style-modal-body');
+  if (!body) return;
+  body.innerHTML = '';
+  const currentVal = document.getElementById('fs-style').value;
+  FS_STYLE_OPTIONS.forEach(opt => {
+    const card = document.createElement('div');
+    card.className = 'fs-style-card' + (currentVal === opt.value ? ' selected' : '');
+
+    if (opt.img) {
+      card.innerHTML = `
+        <div class="fs-style-card-img-wrap">
+          <img src="${opt.img}" alt="${opt.en}" class="fs-style-card-img" loading="lazy"
+               onerror="this.style.display='none';this.nextElementSibling.style.opacity='1'">
+          <div class="fs-style-card-fallback-emoji">${opt.emoji}</div>
+        </div>
+        <div class="fs-style-card-label">
+          <span class="fs-style-card-en">${opt.en}</span>
+          <span class="fs-style-card-ar">${opt.ar}</span>
+        </div>`;
+    } else {
+      card.innerHTML = `
+        <div class="fs-style-card-no-img">${opt.emoji}</div>
+        <div class="fs-style-card-label">
+          <span class="fs-style-card-en">${opt.en}</span>
+          <span class="fs-style-card-ar">${opt.ar}</span>
+        </div>`;
+    }
+    card.addEventListener('click', () => fsSelectStyle(opt));
+    body.appendChild(card);
+  });
+  document.getElementById('fs-style-modal').classList.add('open');
+}
+
+function fsCloseStyleModal() {
+  document.getElementById('fs-style-modal').classList.remove('open');
+}
+
+function fsSelectStyle(opt) {
+  document.getElementById('fs-style').value = opt.value;
+  const box = document.getElementById('fs-style-box');
+  box.classList.add('selected');
+
+  if (opt.img) {
+    box.innerHTML = `
+      <img src="${opt.img}" alt="${opt.en}"
+           style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:8px;display:block;"
+           onerror="this.style.display='none';document.getElementById('fs-style-fallback').style.display='flex'">
+      <div id="fs-style-fallback" style="display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;gap:6px;">
+        <div style="font-size:30px;">${opt.emoji}</div>
+        <div style="font-size:10px;color:#aaa;font-family:'Syne',sans-serif;">${opt.en}</div>
+      </div>
+      <div class="fs-style-box-overlay">
+        <span class="fs-style-box-name">${opt.emoji} ${opt.en}</span>
+        <span class="fs-style-box-change" onclick="event.stopPropagation();fsOpenStyleModal()">تغيير</span>
+      </div>`;
+  } else {
+    box.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;height:100%;">
+        <div style="font-size:30px;">${opt.emoji}</div>
+        <div style="font-size:10px;color:#ccc;font-family:'Syne',sans-serif;letter-spacing:0.5px;">${opt.en}</div>
+      </div>
+      <div class="fs-style-box-overlay">
+        <span class="fs-style-box-name"></span>
+        <span class="fs-style-box-change" onclick="event.stopPropagation();fsOpenStyleModal()">تغيير</span>
+      </div>`;
+  }
+
+  const customWrap = document.getElementById('fs-custom-style-wrap');
+  if (customWrap) customWrap.style.display = opt.value === 'custom' ? '' : 'none';
+  fsCloseStyleModal();
+}
+
+/* ═══════════════════════════════════════
+   GET FULL STORY CONTEXT
+   Returns all filled form data as a rich
+   context string for any generation call
+═══════════════════════════════════════ */
+function fsGetStoryContext() {
+  const title    = document.getElementById('fs-scene-title')?.value.trim()  || '';
+  const summary  = document.getElementById('fs-summary')?.value.trim()      || '';
+  const rawStory = document.getElementById('fs-raw-story')?.value.trim()    || '';
+  const refined  = document.getElementById('fs-refined-story')?.value.trim()|| '';
+  const genre    = document.getElementById('fs-genre')?.value               || '';
+  const duration = document.getElementById('fs-duration')?.value            || '';
+  const env      = document.getElementById('fs-env')?.value                 || '';
+  const time     = document.getElementById('fs-time')?.value                || '';
+  const location = document.getElementById('fs-location')?.value.trim()     || '';
+  const style    = document.getElementById('fs-style')?.value               || 'Cinematic Realism';
+
+  // Collect all characters
+  const chars = [];
+  document.querySelectorAll('.fs-char-card').forEach(card => {
+    const id = card.id.replace('fschar-','');
+    const n  = document.getElementById(`fsc${id}-name`)?.value.trim();
+    if (!n) return;
+    chars.push({
+      name: n,
+      age:  document.getElementById(`fsc${id}-age`)?.value.trim()  || '',
+      role: document.getElementById(`fsc${id}-role`)?.value         || '',
+      desc: document.getElementById(`fsc${id}-desc`)?.value.trim()  || '',
+      ref:  document.getElementById(`fsc${id}-ref`)?.value.trim()   || `@img${id}`
+    });
+  });
+
+  const storyText = refined || summary || rawStory;
+
+  let ctx = `=== FULL STORY CONTEXT ===\n`;
+  if (title)     ctx += `Title: ${title}\n`;
+  if (genre)     ctx += `Genre: ${genre}\n`;
+  if (duration)  ctx += `Duration: ${duration}\n`;
+  if (env)       ctx += `Environment: ${env}\n`;
+  if (time)      ctx += `Time of Day: ${time}\n`;
+  if (location)  ctx += `Main Location: ${location}\n`;
+  if (style)     ctx += `Visual Style: ${style}\n`;
+  if (storyText) ctx += `\nStory:\n${storyText}\n`;
+  if (chars.length) {
+    ctx += `\nCharacters:\n`;
+    chars.forEach((c,i) => {
+      ctx += `${i+1}. ${c.name}${c.age?' (Age: '+c.age+')':''}${c.role?' — '+c.role:''}\n`;
+      if (c.desc) ctx += `   Description: ${c.desc}\n`;
+      ctx += `   Ref Tag: ${c.ref}\n`;
+    });
+  }
+  ctx += `=========================`;
+  return ctx;
+}
+
+/* ═══════════════════════════════════════
+   SECTION TOGGLE
+═══════════════════════════════════════ */
+function fsSectionToggle(header, bodyId) {
+  const body = document.getElementById(bodyId);
+  const chevron = header.querySelector('.fs-chevron');
+  const isOpen = !body.classList.contains('collapsed');
+  body.classList.toggle('collapsed', isOpen);
+  if (chevron) chevron.classList.toggle('open', !isOpen);
+}
+
+function fsCheckAutofillReady() {
+  const shots = document.getElementById('fs-shots-count')?.value;
+  const dur   = document.getElementById('fs-total-dur')?.value;
+  const btn   = document.getElementById('fs-autofill-btn');
+  if (!btn) return;
+  const ready = shots && dur;
+  btn.disabled = !ready;
+  btn.style.opacity = ready ? '1' : '0.4';
+  btn.style.cursor  = ready ? 'pointer' : 'not-allowed';
+}
+
+/* ═══════════════════════════════════════
+   STYLE SELECT
+═══════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  fsAddChar(); fsAddChar();
+  fsAddShot(); fsAddShot();
+});
+
+/* ═══════════════════════════════════════
+   REPHRASE STORY
+═══════════════════════════════════════ */
+async function fsRephraseStory(btnEl) {
+  const input = document.getElementById('fs-raw-story').value.trim();
+  if (!input) return;
+  const btn = btnEl || document.getElementById('fs-rephrase-btn');
+  scSetBtnLoading(btn, true);
+  scShowLoading('Rephrasing Story...', 'جاري صياغة القصة احترافياً...');
+  try {
+    const result = await fsCallAPI({
+      system: `You are an award-winning screenwriter. Transform the story idea into a professional, vivid, cinematic narrative in 3-5 paragraphs. Output in English. Be dramatic and detailed.`,
+      userText: input
+    });
+    document.getElementById('fs-story-refined-wrap').style.display = '';
+    document.getElementById('fs-story-settings').style.display = '';
+    document.getElementById('fs-refined-story').value = result;
+    document.getElementById('fs-autofill-btn').style.display = '';
+  } catch(e) { fshowToast('⚠️ ' + e.message, 'error'); }
+  finally { scSetBtnLoading(btn, false); scHideLoading(); }
+}
+
+/* ═══════════════════════════════════════
+   AUTO FILL
+═══════════════════════════════════════ */
+async function fsAutoFill(btnEl) {
+  const story = document.getElementById('fs-refined-story').value.trim() || document.getElementById('fs-raw-story').value.trim();
+  if (!story) return;
+  const shotsCount = document.getElementById('fs-shots-count').value || '3';
+  const totalDur = document.getElementById('fs-total-dur').value || '15';
+  const btn = btnEl || document.getElementById('fs-autofill-btn');
+  scSetBtnLoading(btn, true);
+  scShowLoading('Auto Filling Form...', 'يحلل القصة ويعبئ النموذج...');
+  try {
+    const result = await fsCallAPI({
+      system: `You are a professional storyboard analyst. Extract structured scene data from the story. Respond ONLY with valid JSON (no markdown, no backticks) in this exact format:
+{
+  "title": "Scene title",
+  "summary": "2-sentence summary",
+  "genre": "Genre",
+  "duration": "X secs",
+  "environment": "Indoor|Outdoor",
+  "time": "Day|Night|Sunset|Dawn",
+  "style": "Cinematic Realism|Anime|Futuristic|etc",
+  "location": "Main location description",
+  "characters": [{"name":"Name","age":"","role":"Main/Supporting","desc":"appearance and personality"}],
+  "shots": [{"name":"Shot name","duration":"Xs","camStyle":"Steady/Handheld/Drone etc","mood":"Mood","desc":"Shot description"}]
+}
+Generate exactly ${shotsCount} shots. Total duration ~${totalDur} seconds distributed across shots.`,
+      userText: story
+    });
+    let data;
+    try {
+      const cleaned = result
+        .replace(/```json\s*/gi, '').replace(/```\s*/gi, '')
+        .replace(/,\s*([}\]])/g, '$1').trim();
+      data = JSON.parse(cleaned);
+    } catch {
+      const m = result.match(/\{[\s\S]*\}/);
+      if (!m) throw new Error('فشل في تحليل البيانات');
+      const cleaned2 = m[0].replace(/,\s*([}\]])/g, '$1').trim();
+      try { data = JSON.parse(cleaned2); }
+      catch { throw new Error('البيانات المُعادة غير صالحة — حاول مرة أخرى'); }
+    }
+    fsApplyData(data);
+    // Open sections
+    ['fs-scene-info-body','fs-chars-body','fs-shots-body'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.classList.contains('collapsed')) {
+        const header = el.previousElementSibling;
+        if (header) fsSectionToggle(header, id);
+      }
+    });
+    fshowToast('✓ تم تعبئة النموذج تلقائياً', 'success');
+  } catch(e) { fshowToast('⚠️ ' + e.message, 'error'); }
+  finally { scSetBtnLoading(btn, false); scHideLoading(); }
+}
+
+function fsApplyData(data) {
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el && v) el.value = v; };
+  setVal('fs-scene-title', data.title);
+  setVal('fs-summary', data.summary);
+  setVal('fs-genre', data.genre);
+  setVal('fs-duration', data.duration);
+  setVal('fs-env', data.environment);
+  setVal('fs-time', data.time);
+  if (data.style) {
+    const styleOpt = FS_STYLE_OPTIONS.find(o => o.value.toLowerCase() === data.style.toLowerCase()) || FS_STYLE_OPTIONS.find(o => o.value === 'Cinematic Realism');
+    if (styleOpt) fsSelectStyle(styleOpt);
+  }
+  setVal('fs-location', data.location);
+  // Characters
+  fsCharCount = 0; document.getElementById('fs-chars-container').innerHTML = '';
+  (data.characters||[]).forEach(c => {
+    fsAddChar();
+    const id = fsCharCount;
+    setVal(`fsc${id}-name`, c.name); setVal(`fsc${id}-age`, c.age);
+    setVal(`fsc${id}-role`, c.role); setVal(`fsc${id}-desc`, c.desc);
+  });
+  if (fsCharCount === 0) { fsAddChar(); fsAddChar(); }
+  // Shots
+  fsShotCount = 0; document.getElementById('fs-shots-container').innerHTML = '';
+  (data.shots||[]).forEach(s => {
+    fsAddShot();
+    const id = fsShotCount;
+    setVal(`fss${id}-name`, s.name); fsUpdateShotPreview(id);
+    setVal(`fss${id}-dur`, s.duration || s.dur);
+    setVal(`fss${id}-cam`, s.camStyle); setVal(`fss${id}-mood`, s.mood);
+    setVal(`fss${id}-desc`, s.desc);
+  });
+  if (fsShotCount === 0) { fsAddShot(); fsAddShot(); }
+}
+
+/* ═══════════════════════════════════════
+   LOCATION PROMPT
+═══════════════════════════════════════ */
+async function fsGenerateLocationPrompt(btnEl) {
+  const loc    = document.getElementById('fs-location')?.value.trim() || '';
+  const style  = document.getElementById('fs-style')?.value  || 'Cinematic Realism';
+  const time   = document.getElementById('fs-time')?.value   || 'Day';
+  const storyCtx = fsGetStoryContext();
+
+  if (!loc && !storyCtx.includes('Story:')) {
+    fshowToast('⚠️ أدخل الموقع أو ملخص القصة أولاً', 'error'); return;
+  }
+
+  const btn = btnEl || null;
+  scSetBtnLoading(btn, true);
+  scShowLoading('Generating Location Prompts...', 'جاري توليد برومبتات المواقع...');
+
+  try {
+    const result = await fsCallAPI({
+      system: `You are a professional cinematographer, location scout, and AI image prompt engineer.
+Based on the FULL STORY CONTEXT provided, generate AT LEAST 8 distinct location/environment reference prompts needed to film this story.
+
+CRITICAL RULES:
+1. ALL locations must be derived directly from the story — use the actual city, country, culture mentioned
+2. Include specific cultural and architectural details true to the story's setting (e.g. Saudi coastal city, judo dojo, etc.)
+3. Each prompt covers a DIFFERENT angle, sub-location, or environment variation from the story
+4. Lighting and atmosphere must match the story's time of day and mood
+
+Respond ONLY with valid JSON (no markdown, no backticks):
+{"locations":[{"num":1,"name":"Location name","prompt":"Prompt text on ONE line, no line breaks, no internal double quotes, under 80 words, English only"}]}
+
+Generate exactly 8 locations. Cover: establishing shots, key interiors/exteriors, detail spots, transitional areas — all derived from the story.
+
+ABSOLUTE RULE: NO humans, NO people, NO animals, NO living creatures of any kind in any location prompt. Pure empty environments only — architecture, light, atmosphere, textures, objects. The locations must look completely empty and ready for filming.`,
+      userText: `${storyCtx}\n\nMain Location: ${loc || 'Derived from story'}\nVisual Style: ${style}\nTime of Day: ${time}`
+    });
+
+    // Robust JSON parsing
+    let data;
+    try {
+      // Clean common JSON issues
+      const cleaned = result
+        .replace(/```json\s*/gi, '')
+        .replace(/```\s*/gi, '')
+        .replace(/[\r\n]+/g, ' ')          // flatten newlines
+        .replace(/,\s*([}\]])/g, '$1')     // remove trailing commas
+        .trim();
+      data = JSON.parse(cleaned);
+    } catch {
+      // Try extracting just the JSON object
+      const m = result.match(/\{[\s\S]*"locations"[\s\S]*\}/);
+      if (!m) throw new Error('فشل في تحليل البيانات من الـ AI');
+      try {
+        const cleaned2 = m[0]
+          .replace(/[\r\n]+/g, ' ')
+          .replace(/,\s*([}\]])/g, '$1')
+          .trim();
+        data = JSON.parse(cleaned2);
+      } catch {
+        throw new Error('البيانات المُعادة غير صالحة — حاول مرة أخرى');
+      }
+    }
+
+    const locs = data.locations || [];
+    if (!locs.length) throw new Error('لم يتم توليد أي مواقع');
+
+    // ── Build the unified grid prompt (like the reference image) ──
+    const cols = locs.length <= 6 ? 2 : 2; // always 2-col grid
+    const rows = Math.ceil(locs.length / cols);
+
+    // Unified prompt for image generators (Midjourney / FLUX / SD)
+    const sceneDesc = locs.map((l, i) =>
+      `Panel ${l.num} (top-left label "${l.num}. ${l.name}"): ${l.prompt}`
+    ).join(' | ');
+
+    const gridPrompt =
+`A ${rows}x${cols} photo-realistic cinematic reference sheet showing ${locs.length} different location shots from the same environment. ` +
+`Each panel is clearly labeled with a number and name in the top-left corner using small white text on dark background. ` +
+`The panels are arranged in a clean grid with thin dark borders between them. ` +
+`All panels share the same visual style: ${style}, time of day: ${time}. ` +
+`Consistent warm cinematic lighting, film grain, professional photography. ` +
+`${sceneDesc}. ` +
+`Shot on cinema camera, 4K, ultra-detailed, consistent color grading across all panels, no text overlap, photorealistic.`;
+
+    // Store for copy
+    document.getElementById('fs-loc-prompt').value = gridPrompt;
+    window._fsLocGridPrompt = gridPrompt;
+    window._fsLocList = locs;
+
+    // Show grid prompt box only
+    document.getElementById('fs-loc-grid-prompt-wrap').style.display = '';
+    document.getElementById('fs-loc-grid-prompt-text').value = gridPrompt;
+    document.getElementById('fs-loc-prompt').value = gridPrompt;
+    fshowToast(`✓ تم توليد برومبت شبكة ${locs.length} مواقع`, 'success');
+
+  } catch(e) { fshowToast('⚠️ ' + e.message, 'error'); }
+  finally { scSetBtnLoading(btn, false); scHideLoading(); }
+}
+
+function fscopySingleLoc(btn, encodedPrompt) {
+  const text = decodeURIComponent(encodedPrompt);
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ تم';
+    setTimeout(() => btn.textContent = orig, 1500);
+    fshowToast('✓ تم النسخ', 'success');
+  });
+}
+
+function fsCopyGridPrompt(btn) {
+  const el = document.getElementById('fs-loc-grid-prompt-text');
+  const text = el?.value?.trim();
+  if (!text) { fshowToast('⚠️ لا يوجد برومبت بعد', 'error'); return; }
+
+  const markDone = () => {
+    const orig = btn.textContent;
+    btn.textContent = '✓ تم النسخ';
+    btn.style.color = '#5eead4';
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; }, 2000);
+    fshowToast('✓ تم نسخ برومبت الشبكة', 'success');
+  };
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(markDone).catch(() => fallbackCopyGrid(el, markDone));
+  } else {
+    fallbackCopyGrid(el, markDone);
+  }
+}
+
+function fallbackCopyGrid(el, onSuccess) {
+  try {
+    el.removeAttribute('readonly');
+    el.select();
+    el.setSelectionRange(0, 99999);
+    const ok = document.execCommand('copy');
+    el.setAttribute('readonly', '');
+    if (ok) onSuccess();
+    else fshowToast('⚠️ تعذّر النسخ — انسخ يدوياً', 'error');
+  } catch(e) {
+    fshowToast('⚠️ تعذّر النسخ — انسخ يدوياً', 'error');
+  }
+}
+
+function fsCopyAllLocPrompts() {
+  const text = document.getElementById('fs-loc-grid-prompt-text')?.value || document.getElementById('fs-loc-prompt').value;
+  if (!text) { fshowToast('⚠️ لا يوجد برومبت بعد', 'error'); return; }
+  navigator.clipboard.writeText(text).then(() => {
+    fshowToast('✓ تم نسخ برومبت الشبكة', 'success');
+    const btn = event?.currentTarget;
+    if (btn) { const o = btn.textContent; btn.textContent = '✓ تم'; setTimeout(() => btn.textContent = o, 1500); }
+  });
+}
+
+/* ═══════════════════════════════════════
+   ADD CHARACTER
+═══════════════════════════════════════ */
+function fsAddChar() {
+  fsCharCount++;
+  const id = fsCharCount;
+  const container = document.getElementById('fs-chars-container');
+  const card = document.createElement('div');
+  card.className = 'fs-char-card';
+  card.id = `fschar-${id}`;
+  card.innerHTML = `
+    <div class="fs-char-header" onclick="fsToggleCharBody(${id})">
+      <div class="fs-char-num">${id}</div>
+      <div class="fs-char-title" id="fsc${id}-title">CHARACTER ${id}</div>
+      <button class="fs-char-remove" onclick="event.stopPropagation();fsRemoveChar(${id})">✕</button>
+      <button class="fs-char-collapse-btn open" id="fsc${id}-collapse">▼</button>
+    </div>
+    <div class="fs-char-body" id="fsc${id}-body">
+      <div class="fs-char-img-row">
+        <div class="fs-char-img-wrap">
+          <img class="fs-char-img-preview" id="fsc${id}-img-preview" alt="Char">
+          <div class="fs-char-img-placeholder" id="fsc${id}-img-placeholder" onclick="document.getElementById('fsc${id}-img-input').click()">
+            <div class="fs-char-img-placeholder-icon">🖼️</div>
+            <div class="fs-char-img-placeholder-text">صورة مرجعية</div>
+          </div>
+          <input type="file" class="fs-char-img-input" id="fsc${id}-img-input" accept="image/*" onchange="fsHandleCharImage(event,${id})">
+          <div class="fs-char-img-delete" id="fsc${id}-img-delete" onclick="fsClearCharImage(${id})">✕</div>
+        </div>
+        <div class="fs-char-fields">
+          <div class="fs-grid2">
+            <div class="fs-field">
+              <div class="fs-field-label"><span class="fs-field-label-ar">الاسم</span><span class="sep">|</span>Name</div>
+              <input type="text" id="fsc${id}-name" placeholder="اسم الشخصية" oninput="fsUpdateCharTitle(${id})">
+            </div>
+            <div class="fs-field">
+              <div class="fs-field-label"><span class="fs-field-label-ar">الرمز المرجعي</span><span class="sep">|</span>Ref Tag</div>
+              <input type="text" id="fsc${id}-ref" value="@img${id}" style="font-family:monospace;color:#888;">
+            </div>
+          </div>
+          <div class="fs-grid2">
+            <div class="fs-field">
+              <div class="fs-field-label"><span class="fs-field-label-ar">العمر</span><span class="sep">|</span>Age</div>
+              <input type="text" id="fsc${id}-age" placeholder="مثال: 28">
+            </div>
+            <div class="fs-field">
+              <div class="fs-field-label"><span class="fs-field-label-ar">الدور</span><span class="sep">|</span>Role</div>
+              <select id="fsc${id}-role">
+                <option value="" disabled selected>اختر الدور</option>
+                <option value="Main Character">Main Character — الشخصية الرئيسية</option>
+                <option value="Supporting">Supporting — مساعد</option>
+                <option value="Background">Background — خلفية</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="fs-field">
+        <div class="fs-field-label"><span class="fs-field-label-ar">الوصف</span><span class="sep">|</span>Description</div>
+        <textarea id="fsc${id}-desc" rows="2" placeholder="وصف الشخصية — المظهر والشخصية..."></textarea>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button class="btn-analyze" id="fsc${id}-analyze-btn" onclick="fsAnalyzeCharImage(${id},this)" style="display:none;" disabled>✦ تحليل الصورة</button>
+        <div class="fs-char-analyzing" id="fsc${id}-analyzing"><div class="fs-char-analyzing-ring"></div><span>يحلل...</span></div>
+        <button class="btn-gen-cprompt" onclick="fsGenerateCharPrompt(${id},this)">
+          <span class="fs-char-analyzing-ring" id="fsc${id}-prompt-ring" style="display:none"></span>
+          🎬 توليد ورقة قصة الشخصية
+        </button>
+      </div>
+      <div class="fs-char-prompt-box">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+          <div style="font-family:monospace;font-size:9px;color:#555;text-transform:uppercase;letter-spacing:0.1em;">✦ Character Sheet Prompt</div>
+          <button class="sb-copy-btn" onclick="fsCopyText('fsc${id}-prompt')">⎘ نسخ</button>
+        </div>
+        <textarea class="fs-char-prompt-output" id="fsc${id}-prompt"
+          style="min-height:110px;color:#93c5fd;border-color:#1e2a3a;background:#080c12;"
+          placeholder="سيظهر هنا برومبت ورقة قصة الشخصية الكاملة...&#10;ضعه في Midjourney / FLUX للحصول على Character Sheet"></textarea>
+        <div style="margin-top:5px;font-size:11px;color:#444;font-family:'DM Sans',sans-serif;">
+          💡 ضع البرومبت في <strong style="color:#666;">Midjourney / FLUX / Stable Diffusion</strong>
+        </div>
+      </div>
+    </div>`;
+  container.appendChild(card);
+  fsUpdateCharsInShots();
+}
+
+function fsUpdateCharTitle(id) {
+  const name = document.getElementById(`fsc${id}-name`)?.value.trim();
+  const title = document.getElementById(`fsc${id}-title`);
+  if (title) title.textContent = name ? name.toUpperCase() : `CHARACTER ${id}`;
+  fsUpdateCharsInShots();
+}
+
+function fsToggleCharBody(id) {
+  const body = document.getElementById(`fsc${id}-body`);
+  const btn = document.getElementById(`fsc${id}-collapse`);
+  body.classList.toggle('collapsed');
+  if (btn) btn.classList.toggle('open');
+}
+
+function fsRemoveChar(id) {
+  const card = document.getElementById(`fschar-${id}`);
+  if (card) card.remove();
+  fsUpdateCharsInShots();
+}
+
+/* ═══════════════════════════════════════
+   CHAR IMAGE
+═══════════════════════════════════════ */
+function fsHandleCharImage(event, id) {
+  const file = event.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const b64 = e.target.result.split(',')[1];
+    fsCharImages[id] = { data: b64, type: file.type };
+    const preview = document.getElementById(`fsc${id}-img-preview`);
+    const placeholder = document.getElementById(`fsc${id}-img-placeholder`);
+    const del = document.getElementById(`fsc${id}-img-delete`);
+    const analyzeBtn = document.getElementById(`fsc${id}-analyze-btn`);
+    if (preview) { preview.src = e.target.result; preview.style.display = 'block'; }
+    if (placeholder) placeholder.style.display = 'none';
+    if (del) del.style.display = 'flex';
+    if (analyzeBtn) { analyzeBtn.style.display = ''; analyzeBtn.disabled = false; }
+  };
+  reader.readAsDataURL(file);
+}
+
+function fsClearCharImage(id) {
+  delete fsCharImages[id];
+  const preview = document.getElementById(`fsc${id}-img-preview`);
+  const placeholder = document.getElementById(`fsc${id}-img-placeholder`);
+  const del = document.getElementById(`fsc${id}-img-delete`);
+  const analyzeBtn = document.getElementById(`fsc${id}-analyze-btn`);
+  const input = document.getElementById(`fsc${id}-img-input`);
+  if (preview) { preview.style.display = 'none'; preview.src = ''; }
+  if (placeholder) placeholder.style.display = '';
+  if (del) del.style.display = 'none';
+  if (analyzeBtn) { analyzeBtn.style.display = 'none'; analyzeBtn.disabled = true; }
+  if (input) input.value = '';
+}
+
+async function fsAnalyzeCharImage(id, btnEl) {
+  const imgData = fsCharImages[id]; if (!imgData) return;
+  const btn = document.getElementById(`fsc${id}-analyze-btn`);
+  scSetBtnLoading(btn, true);
+  scShowLoading('Analyzing Image...', 'جاري تحليل صورة الشخصية...');
+  const storyCtx = fsGetStoryContext();
+  try {
+    const result = await fsCallAPI({
+      system: `You are a professional character analyst. Analyze this character image in the context of the story provided.
+Describe: physical appearance, age estimate, clothing style, expression, and notable features.
+Make sure the description is consistent with the story's cultural and narrative context.
+Be specific and vivid. English only.
+IMPORTANT: If referring to the character by name, use ONLY the name as it appears in the story. Never invent or add family names, last names, or surnames.`,
+      userContent: [
+        { type: 'image', source: { type: 'base64', media_type: imgData.type, data: imgData.data } },
+        { type: 'text', text: `${storyCtx}\n\nAnalyze this character image in context of the story above.` }
+      ]
+    });
+    const descEl = document.getElementById(`fsc${id}-desc`);
+    if (descEl) descEl.value = result;
+  } catch(e) { fshowToast('⚠️ ' + e.message, 'error'); }
+  finally { scSetBtnLoading(btn, false); scHideLoading(); }
+}
+
+/* ═══════════════════════════════════════
+   GENERATE CHAR PROMPT
+═══════════════════════════════════════ */
+async function fsGenerateCharPrompt(id, btnEl) {
+  const name = document.getElementById(`fsc${id}-name`)?.value.trim() || 'Character';
+  const age  = document.getElementById(`fsc${id}-age`)?.value.trim()  || '';
+  const role = document.getElementById(`fsc${id}-role`)?.value         || '';
+  const desc = document.getElementById(`fsc${id}-desc`)?.value.trim()  || '';
+  const ref  = document.getElementById(`fsc${id}-ref`)?.value.trim()   || `@img${id}`;
+  const style = document.getElementById('fs-style')?.value || 'Cinematic Realism';
+
+  const btn = btnEl || null;
+  scSetBtnLoading(btn, true);
+  scShowLoading('Generating Character Sheet...', 'جاري توليد ورقة قصة الشخصية...');
+
+  try {
+    const imgData = fsCharImages[id];
+    const storyCtx = fsGetStoryContext();
+
+    const textPrompt = `${storyCtx}
+
+--- THIS CHARACTER ---
+Name: ${name}
+Age: ${age || 'Not specified'}
+Role: ${role || 'Not specified'}
+Description: ${desc || 'Not specified'}
+Ref Tag: ${ref}
+
+Generate a complete Character Sheet image prompt for this character.
+IMPORTANT: The character's nationality, clothing, sport/profession, and all visual details MUST be derived from the story context above.
+Do not invent details not present in the story.`;
+
+    const userContent = imgData
+      ? [
+          { type: 'image', source: { type: 'base64', media_type: imgData.type, data: imgData.data } },
+          { type: 'text', text: textPrompt }
+        ]
+      : undefined;
+
+    const result = await fsCallAPI({
+      system: `You are a professional character designer and AI prompt engineer for cinematic productions.
+
+Your job: Generate ONE comprehensive AI image generation prompt that produces a CHARACTER SHEET grid — like professional film/animation character reference sheets.
+
+CRITICAL RULES:
+1. Extract ALL visual details from the story context: nationality, skin tone, clothing style, sport/profession, cultural markers, setting
+2. The character's outfit MUST match their role in the story (e.g. judogi for judo player, traditional dress if Saudi, etc.)
+3. NEVER invent generic Western/default appearances — use only what the story tells you
+4. Every panel must be consistent with the story's time, place, and culture
+5. IMPORTANT: Use ONLY the character name as provided in the input. Never add family names, last names, or surnames. If no name is given, use only a simple first name.
+
+The prompt must describe a grid image with these panels:
+- TOP ROW: Character name large top-left + stats (Age, Role, Height, Build, Hair, Eyes, Nationality) | FRONT VIEW | SIDE VIEW | BACK VIEW | CLOSE-UP FACIAL REFERENCE
+- MIDDLE ROW: EXPRESSION SHEET — 4 close-up faces labeled with emotions fitting the character's personality
+- BOTTOM ROW: 4 action/pose panels matching character's role and story | DETAILS panel (costume & props) | PERSONALITY & BACKGROUND text panel
+
+All panels: same character, same authentic costume from story, same lighting consistent with story's time and location.
+Visual style: ${style}. Photorealistic, 4K, cinematic lighting, professional photography, consistent color grading.
+End with ref tag: ${ref}
+Output ONLY the image prompt. English only.`,
+      userText: userContent ? undefined : textPrompt,
+      userContent
+    });
+
+    document.getElementById(`fsc${id}-prompt`).value = result;
+    fshowToast('✓ تم توليد ورقة قصة الشخصية', 'success');
+  } catch(e) { fshowToast('⚠️ ' + e.message, 'error'); }
+  finally { scSetBtnLoading(btn, false); scHideLoading(); }
+}
+
+/* ═══════════════════════════════════════
+   ADD SHOT
+═══════════════════════════════════════ */
+function fsAddShot() {
+  fsShotCount++;
+  const id = fsShotCount;
+  const container = document.getElementById('fs-shots-container');
+  const card = document.createElement('div');
+  card.className = 'fs-shot-card';
+  card.id = `fsshot-${id}`;
+  card.innerHTML = `
+    <div class="fs-shot-header" onclick="fsToggleShotBody(${id})">
+      <div class="fs-shot-num">${id}</div>
+      <div class="fs-shot-name-preview" id="fss${id}-preview">SHOT ${id}</div>
+      <button class="fs-shot-remove" onclick="event.stopPropagation();fsRemoveShot(${id})">✕</button>
+      <button class="fs-shot-collapse-btn open" id="fss${id}-collapse">▼</button>
+    </div>
+    <div class="fs-shot-body" id="fss${id}-body">
+      <div class="fs-grid2">
+        <div class="fs-field">
+          <div class="fs-field-label"><span class="fs-field-label-ar">اسم اللقطة</span><span class="sep">|</span>Shot Name</div>
+          <input type="text" id="fss${id}-name" placeholder="مثال: Opening Wide Shot" oninput="fsUpdateShotPreview(${id})">
+        </div>
+        <div class="fs-field">
+          <div class="fs-field-label"><span class="fs-field-label-ar">المدة</span><span class="sep">|</span>Duration</div>
+          <select id="fss${id}-dur">
+            <option value="" disabled selected>اختر المدة</option>
+            <option>3s</option><option>4s</option><option>5s</option>
+            <option>6s</option><option>7s</option><option>8s</option><option>10s</option>
+          </select>
+        </div>
+      </div>
+      <div class="fs-grid3">
+        <div class="fs-field">
+          <div class="fs-field-label"><span class="fs-field-label-ar">حجم اللقطة</span><span class="sep">|</span>Shot Size</div>
+          <select id="fss${id}-size">
+            <option value="" disabled selected>اختر الحجم</option>
+            <option>Extra Wide</option><option>Wide</option><option>Wide Scene</option>
+            <option>Medium Wide</option><option>Medium</option><option>Close-up</option><option>Macro</option>
+          </select>
+        </div>
+        <div class="fs-field">
+          <div class="fs-field-label"><span class="fs-field-label-ar">حركة الكاميرا</span><span class="sep">|</span>Camera</div>
+          <select id="fss${id}-cam">
+            <option value="" disabled selected>اختر الحركة</option>
+            <option>Steady</option><option>Handheld</option><option>Drone</option>
+            <option>Pan Left</option><option>Pan Right</option><option>Tilt Up</option>
+            <option>Tilt Down</option><option>Zoom In</option><option>Zoom Out</option><option>Tracking</option>
+          </select>
+        </div>
+        <div class="fs-field">
+          <div class="fs-field-label"><span class="fs-field-label-ar">موقع الكاميرا</span><span class="sep">|</span>Cam Position</div>
+          <select id="fss${id}-campos">
+            <option value="" disabled selected>اختر الموقع</option>
+            <option>Eye-level</option><option>High-angle</option><option>Low-angle</option>
+            <option>Aerial</option><option>Overhead</option><option>Ground-Level</option><option>Dutch angle</option>
+          </select>
+        </div>
+      </div>
+      <div class="fs-grid2">
+        <div class="fs-field">
+          <div class="fs-field-label"><span class="fs-field-label-ar">المزاج</span><span class="sep">|</span>Mood</div>
+          <select id="fss${id}-mood">
+            <option value="" disabled selected>اختر المزاج</option>
+            <option>Epic</option><option>Dramatic</option><option>Mysterious</option>
+            <option>Romantic</option><option>Tense</option><option>Calm</option>
+            <option>Energetic</option><option>Melancholic</option><option>Hopeful</option>
+          </select>
+        </div>
+        <div class="fs-field">
+          <div class="fs-field-label"><span class="fs-field-label-ar">الشخصيات</span><span class="sep">|</span>Characters</div>
+          <select id="fss${id}-chars" multiple style="min-height:60px;">
+            <option value="All">All Characters</option>
+          </select>
+        </div>
+      </div>
+      <div class="fs-field">
+        <div class="fs-field-label"><span class="fs-field-label-ar">وصف اللقطة</span><span class="sep">|</span>Shot Description</div>
+        <textarea id="fss${id}-desc" rows="2" placeholder="صف ما يحدث في هذه اللقطة..."></textarea>
+      </div>
+      <div class="fs-field">
+        <div class="fs-field-label"><span class="fs-field-label-ar">السلبيات</span><span class="sep">|</span>Negative Prompt</div>
+        <input type="text" id="fss${id}-neg" placeholder="مثال: blurry, distorted, low quality...">
+      </div>
+    </div>`;
+  container.appendChild(card);
+  fsUpdateCharsInShots();
+}
+
+function fsUpdateShotPreview(id) {
+  const name = document.getElementById(`fss${id}-name`)?.value.trim();
+  const el = document.getElementById(`fss${id}-preview`);
+  if (el) el.textContent = name ? name.toUpperCase() : `SHOT ${id}`;
+}
+
+function fsToggleShotBody(id) {
+  const body = document.getElementById(`fss${id}-body`);
+  const btn = document.getElementById(`fss${id}-collapse`);
+  body.classList.toggle('collapsed');
+  if (btn) btn.classList.toggle('open');
+}
+
+function fsRemoveShot(id) {
+  const card = document.getElementById(`fsshot-${id}`);
+  if (card) card.remove();
+}
+
+function fsUpdateCharsInShots() {
+  const chars = [];
+  document.querySelectorAll('[id^="fsc"][id$="-name"]').forEach(el => {
+    const name = el.value.trim();
+    if (name) chars.push(name);
+  });
+  document.querySelectorAll('[id^="fss"][id$="-chars"]').forEach(sel => {
+    const current = [...sel.selectedOptions].map(o => o.value);
+    sel.innerHTML = '<option value="All">All Characters</option>';
+    chars.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      if (current.includes(c)) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+/* ═══════════════════════════════════════
+   GET DATA
+═══════════════════════════════════════ */
+function fsGetChars() {
+  const chars = [];
+  document.querySelectorAll('.fs-char-card').forEach(card => {
+    const id = card.id.replace('fschar-','');
+    const name = document.getElementById(`fsc${id}-name`)?.value.trim() || '';
+    if (!name) return;
+    chars.push({
+      name,
+      ref: document.getElementById(`fsc${id}-ref`)?.value || `@img${id}`,
+      age: document.getElementById(`fsc${id}-age`)?.value || '',
+      role: document.getElementById(`fsc${id}-role`)?.value || '',
+      desc: document.getElementById(`fsc${id}-desc`)?.value || '',
+      prompt: document.getElementById(`fsc${id}-prompt`)?.value || ''
+    });
+  });
+  return chars;
+}
+
+function fsGetShots() {
+  const shots = [];
+  document.querySelectorAll('.fs-shot-card').forEach(card => {
+    const id = card.id.replace('fsshot-','');
+    shots.push({
+      name: document.getElementById(`fss${id}-name`)?.value || `Shot ${id}`,
+      dur: document.getElementById(`fss${id}-dur`)?.value || '',
+      size: document.getElementById(`fss${id}-size`)?.value || '',
+      cam: document.getElementById(`fss${id}-cam`)?.value || '',
+      campos: document.getElementById(`fss${id}-campos`)?.value || '',
+      mood: document.getElementById(`fss${id}-mood`)?.value || '',
+      chars: [...(document.getElementById(`fss${id}-chars`)?.selectedOptions||[])].map(o=>o.value).join(', '),
+      desc: document.getElementById(`fss${id}-desc`)?.value || '',
+      neg: document.getElementById(`fss${id}-neg`)?.value || ''
+    });
+  });
+  return shots;
+}
+
+/* ═══════════════════════════════════════
+   GENERATE
+═══════════════════════════════════════ */
+function fsStopGenerate() { if (fsGenerateActive) fsGenerateAborted = true; }
+
+async function fsGenerate() {
+  const btn = document.getElementById('fs-gen-btn');
+  const stopBtn = document.getElementById('fs-stop-btn');
+  const errorBox = document.getElementById('fs-error-box');
+  errorBox.classList.remove('show');
+  document.getElementById('fs-storyboard-grid').innerHTML = '';
+  document.getElementById('fs-final-prompt-wrap').style.display = 'none';
+  document.getElementById('fs-output-section').classList.remove('show');
+
+  const title = document.getElementById('fs-scene-title').value.trim();
+  const summary = document.getElementById('fs-summary').value.trim();
+  const genre = document.getElementById('fs-genre').value || 'Cinematic';
+  const duration = document.getElementById('fs-duration').value;
+  const env = document.getElementById('fs-env').value;
+  const time = document.getElementById('fs-time').value;
+  const location = document.getElementById('fs-location').value.trim();
+  const styleSel = document.getElementById('fs-style').value;
+  const style = styleSel === 'custom'
+    ? (document.getElementById('fs-custom-style')?.value.trim() || 'Custom Style')
+    : (styleSel || 'Cinematic Realism');
+  const chars = fsGetChars();
+  const shots = fsGetShots();
+
+  if (!summary && shots.length === 0) {
+    errorBox.textContent = '⚠️ الرجاء إدخال ملخص المشهد واللقطات على الأقل';
+    errorBox.classList.add('show'); return;
+  }
+
+  btn.disabled = true; btn.style.display = 'none';
+  stopBtn.style.display = 'flex';
+  fsGenerateAborted = false; fsGenerateActive = true;
+  scShowLoading('Generating Full Scene Prompt...', 'جاري توليد البرومبت الكامل...');
+  document.querySelector('.fs-gen-bar')?.classList.add('generating');
+
+  const rawStoryText = document.getElementById('fs-refined-story')?.value.trim()
+                     || document.getElementById('fs-raw-story')?.value.trim() || '';
+
+  const formData = `Scene Title: ${title||'Untitled'}
+Story Summary: ${summary||'Not provided'}
+${rawStoryText ? 'Full Story:\n'+rawStoryText+'\n' : ''}Genre: ${genre} | Duration: ${duration} | Environment: ${env} | Time: ${time}
+Location: ${location||'Not specified'} | Visual Style: ${style}
+
+Characters:
+${chars.map((c,i)=>`${i+1}. ${c.name} ${c.ref}${c.age?' — Age: '+c.age:''}${c.role?' — '+c.role:''}${c.desc?'\n   '+c.desc:''}`).join('\n')||'None'}
+
+Shots:
+${shots.map((s,i)=>`SHOT ${i+1}: ${s.name}
+  Duration: ${s.dur} | Size: ${s.size} | Camera: ${s.cam} | Position: ${s.campos} | Mood: ${s.mood}
+  Characters: ${s.chars||'All'}
+  Description: ${s.desc||'Not described'}
+  Negative: ${s.neg||'None'}`).join('\n\n')}`;
+
+  try {
+    const result = await fsCallAPI({
+      system: `You are a professional AI video storyboard engineer for Seedance, Kling AI, Runway ML, and Sora.
+
+CRITICAL: Every prompt must reflect the story's actual setting, culture, characters, and costumes.
+- Use the real nationality, clothing, and cultural details from the story
+- Character descriptions in prompts must match their story descriptions exactly
+- Locations must reflect the real geography/architecture from the story
+- Do NOT use generic Western defaults — derive everything from the story context
+
+Respond ONLY with valid JSON (no markdown, no backticks, no explanation).
+Return this exact structure:
+{
+  "shots": [
+    {
+      "num": 1,
+      "name": "Shot name",
+      "duration": "5s",
+      "size": "Wide",
+      "camera": "Steady",
+      "position": "Eye-level",
+      "mood": "Epic",
+      "characters": "Character @img1",
+      "prompt": "Vivid cinematic description 2-4 sentences. Include character's authentic appearance, real location details, visual style, lighting. Embed @refTag after names.",
+      "negative": "blurry, distorted, low quality"
+    }
+  ],
+  "finalPrompt": "Comprehensive single prompt combining all scenes.",
+  "seedancePrompt": "Optimized prompt for Seedance 2.0 specifically. Must be under 5000 words. Include: subject description with ref tags, environment, camera motion (pan/tilt/zoom/static), lighting, mood, visual style, motion details, negative prompt at end after NEGATIVE:. Use Seedance-native syntax: clear subject first, then scene, then motion, then technical params. Be dense and precise. @refTags after character names."
+}
+English only. Visual Style dominates. Time of day defines lighting. @refTags after character names.`,
+      userText: `Generate a complete storyboard for:\n\n${formData}`
+    });
+
+    if (fsGenerateAborted) throw { name: 'AbortError' };
+
+    // Parse JSON — robust
+    let sbData;
+    try {
+      const cleaned = result
+        .replace(/```json\s*/gi, '').replace(/```\s*/gi, '')
+        .replace(/,\s*([}\]])/g, '$1').trim();
+      sbData = JSON.parse(cleaned);
+    } catch {
+      const m = result.match(/\{[\s\S]*\}/);
+      if (!m) throw new Error('فشل في تحليل البيانات');
+      try {
+        const cleaned2 = m[0].replace(/,\s*([}\]])/g, '$1').trim();
+        sbData = JSON.parse(cleaned2);
+      } catch { throw new Error('البيانات المُعادة غير صالحة — حاول مرة أخرى'); }
+    }
+
+    // Store for copy
+    window._fsFinalPrompt = sbData.finalPrompt || '';
+    window._fsSeedancePrompt = sbData.seedancePrompt || '';
+    window._fsShotsData = sbData.shots || [];
+
+    // Build storyboard grid
+    fsRenderStoryboard(sbData);
+
+    document.getElementById('fs-output-section').classList.add('show');
+    document.getElementById('fs-output-section').scrollIntoView({ behavior: 'smooth' });
+
+  } catch(e) {
+    if (e.name === 'AbortError') fshowToast('⊗ تم إيقاف التوليد', 'error');
+    else { errorBox.textContent = '⚠️ خطأ: ' + e.message; errorBox.classList.add('show'); }
+  } finally {
+    fsGenerateAborted = false; fsGenerateActive = false;
+    btn.disabled = false; btn.style.display = '';
+    stopBtn.style.display = 'none';
+    scHideLoading();
+    document.querySelector('.fs-gen-bar')?.classList.remove('generating');
+  }
+}
+
+/* ═══════════════════════════════════════
+   RENDER STORYBOARD
+═══════════════════════════════════════ */
+function fsRenderStoryboard(data) {
+  // Final prompt
+  if (data.finalPrompt) {
+    document.getElementById('fs-final-prompt-text').textContent = data.finalPrompt;
+    document.getElementById('fs-final-prompt-wrap').style.display = '';
+    window._fsFinalPrompt = data.finalPrompt;
+  }
+  // Seedance prompt
+  if (data.seedancePrompt) {
+    const cleanedSeedance = data.seedancePrompt.replace(/@img\d+/g, '').replace(/\s{2,}/g, ' ').trim();
+    document.getElementById('fs-seedance-prompt-text').textContent = cleanedSeedance;
+    document.getElementById('fs-seedance-prompt-wrap').style.display = '';
+    window._fsSeedancePrompt = cleanedSeedance;
+  }
+  window._fsShotsData = data.shots || [];
+}
+
+function fsCopyShotPrompt(idx) {
+  const shots = window._fsShotsData || [];
+  const shot = shots[idx];
+  if (!shot) return;
+  const text = `SHOT ${shot.num || (idx+1)} — ${shot.name}\n${shot.size} | ${shot.camera} | ${shot.position} | ${shot.mood}\nCharacters: ${shot.characters}\n\nPROMPT:\n${shot.prompt}\n\nNEGATIVE: ${shot.negative}`;
+  const btn = event?.currentTarget;
+  const markDone = () => {
+    if (btn) { const o = btn.textContent; btn.textContent = '✓ تم'; setTimeout(() => btn.textContent = o, 1500); }
+    fshowToast('✓ تم نسخ برومبت اللقطة', 'success');
+  };
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(markDone).catch(() => { const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText='position:fixed;top:-9999px;opacity:0;'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');markDone();}catch(e){} document.body.removeChild(ta); });
+  } else { const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText='position:fixed;top:-9999px;opacity:0;'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');markDone();}catch(e){} document.body.removeChild(ta); }
+}
+
+function fsCopyFinalPrompt() {
+  const text = window._fsFinalPrompt || '';
+  if (!text) { fshowToast('⚠️ لا يوجد برومبت بعد', 'error'); return; }
+  const markDone = () => fshowToast('✓ تم نسخ البرومبت النهائي', 'success');
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(markDone).catch(() => { const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText='position:fixed;top:-9999px;opacity:0;'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');markDone();}catch(e){} document.body.removeChild(ta); });
+  } else { const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText='position:fixed;top:-9999px;opacity:0;'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');markDone();}catch(e){} document.body.removeChild(ta); }
+}
+
+function fsCopySeedancePrompt() {
+  const text = window._fsSeedancePrompt || '';
+  if (!text) { fshowToast('⚠️ لا يوجد برومبت Seedance بعد', 'error'); return; }
+  const markDone = () => fshowToast('✓ تم نسخ برومبت Seedance', 'success');
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(markDone).catch(() => { const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText='position:fixed;top:-9999px;opacity:0;'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');markDone();}catch(e){} document.body.removeChild(ta); });
+  } else { const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText='position:fixed;top:-9999px;opacity:0;'; document.body.appendChild(ta); ta.select(); try{document.execCommand('copy');markDone();}catch(e){} document.body.removeChild(ta); }
+}
+
+function fsClearSeedancePrompt() {
+  document.getElementById('fs-seedance-prompt-text').textContent = '';
+  document.getElementById('fs-seedance-prompt-wrap').style.display = 'none';
+  window._fsSeedancePrompt = '';
+  fshowToast('✓ تم مسح برومبت Seedance', 'success');
+}
+
+function fsCopyOutput() {
+  fsCopyFinalPrompt();
+}
+
+function fsClearOutput() {
+  document.getElementById('fs-storyboard-grid').innerHTML = '';
+  document.getElementById('fs-final-prompt-wrap').style.display = 'none';
+  document.getElementById('fs-seedance-prompt-wrap').style.display = 'none';
+  document.getElementById('fs-seedance-prompt-text').textContent = '';
+  document.getElementById('fs-output-section').classList.remove('show');
+  window._fsFinalPrompt = '';
+  window._fsSeedancePrompt = '';
+  window._fsShotsData = [];
+}
+
+/* ═══════════════════════════════════════
+   CLEAR ALL
+═══════════════════════════════════════ */
+function fsClearAll() {
+  const dialog = document.getElementById('fs-clear-dialog');
+  dialog.style.display = 'flex';
+}
+
+function fsConfirmClear(confirmed) {
+  document.getElementById('fs-clear-dialog').style.display = 'none';
+  if (!confirmed) return;
+
+  // ── مسح حقول النموذج ──
+  ['fs-scene-title','fs-summary','fs-location','fs-raw-story','fs-refined-story',
+   'fs-duration','fs-env','fs-time','fs-style'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  // ── مسح الشخصيات واللقطات وإعادة الافتراضي ──
+  document.getElementById('fs-chars-container').innerHTML = ''; fsCharCount = 0;
+  document.getElementById('fs-shots-container').innerHTML = ''; fsShotCount = 0;
+  fsAddChar(); fsAddChar(); fsAddShot(); fsAddShot();
+
+  // ── مسح الـ outputs ──
+  fsClearOutput();
+  window._fsFinalPrompt = '';
+  window._fsSeedancePrompt = '';
+  window._fsLocGridPrompt = '';
+  window._fsLocList = [];
+  window._fsActiveProjectId = null;
+
+  // ── إخفاء العناصر الإضافية ──
+  ['fs-story-refined-wrap','fs-story-settings','fs-autofill-btn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  const locGridWrap = document.getElementById('fs-loc-grid-prompt-wrap');
+  if (locGridWrap) locGridWrap.style.display = 'none';
+  document.getElementById('fs-error-box')?.classList.remove('show');
+
+  // ── طي كل الأقسام ما عدا Story Input ──
+  [
+    { bodyId: 'fs-scene-info-body', headerId: 'fs-scene-info-header' },
+    { bodyId: 'fs-chars-body',      headerId: 'fs-chars-header' },
+    { bodyId: 'fs-shots-body',      headerId: 'fs-shots-header' },
+  ].forEach(({ bodyId }) => {
+    const body = document.getElementById(bodyId);
+    if (body && !body.classList.contains('collapsed')) {
+      body.classList.add('collapsed');
+      const header = body.previousElementSibling;
+      const chevron = header?.querySelector('.fs-chevron');
+      if (chevron) chevron.classList.remove('open');
+    }
+  });
+
+  // ── فتح Story Input إن كان مطوياً ──
+  const storyBody = document.getElementById('fs-story-input-body');
+  if (storyBody && storyBody.classList.contains('collapsed')) {
+    storyBody.classList.remove('collapsed');
+    const header = storyBody.previousElementSibling;
+    const chevron = header?.querySelector('.fs-chevron');
+    if (chevron) chevron.classList.add('open');
+  }
+
+  fshowToast('✓ تم مسح جميع البيانات', 'success');
+}
+
+/* ═══════════════════════════════════════
+   SAVE PROJECT
+═══════════════════════════════════════ */
+function fsSaveProject() {
+  const title = document.getElementById('fs-scene-title').value.trim() || 'Full Scene';
+  const now = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  // ── جمع بيانات النموذج ──
+  const formData = {
+    rawStory:    document.getElementById('fs-raw-story')?.value || '',
+    sceneTitle:  document.getElementById('fs-scene-title')?.value || '',
+    summary:     document.getElementById('fs-summary')?.value || '',
+    duration:    document.getElementById('fs-duration')?.value || '',
+    env:         document.getElementById('fs-env')?.value || '',
+    time:        document.getElementById('fs-time')?.value || '',
+    style:       document.getElementById('fs-style')?.value || '',
+    location:    document.getElementById('fs-location')?.value || '',
+    totalDur:    document.getElementById('fs-total-dur')?.value || '',
+    shotsCount:  document.getElementById('fs-shots-count')?.value || '',
+  };
+
+  // ── الشخصيات ──
+  const chars = [];
+  for (let i = 1; i <= fsCharCount; i++) {
+    if (!document.getElementById(`fsc${i}-name`)) continue;
+    chars.push({
+      id:     i,
+      name:   document.getElementById(`fsc${i}-name`)?.value || '',
+      ref:    document.getElementById(`fsc${i}-ref`)?.value || '',
+      age:    document.getElementById(`fsc${i}-age`)?.value || '',
+      role:   document.getElementById(`fsc${i}-role`)?.value || '',
+      desc:   document.getElementById(`fsc${i}-desc`)?.value || '',
+      prompt: document.getElementById(`fsc${i}-prompt`)?.value || '',
+    });
+  }
+
+  // ── اللقطات ──
+  const shots = [];
+  for (let i = 1; i <= fsShotCount; i++) {
+    if (!document.getElementById(`fss${i}-name`)) continue;
+    shots.push({
+      id:     i,
+      name:   document.getElementById(`fss${i}-name`)?.value || '',
+      dur:    document.getElementById(`fss${i}-dur`)?.value || '',
+      size:   document.getElementById(`fss${i}-size`)?.value || '',
+      cam:    document.getElementById(`fss${i}-cam`)?.value || '',
+      campos: document.getElementById(`fss${i}-campos`)?.value || '',
+      mood:   document.getElementById(`fss${i}-mood`)?.value || '',
+      desc:   document.getElementById(`fss${i}-desc`)?.value || '',
+      neg:    document.getElementById(`fss${i}-neg`)?.value || '',
+    });
+  }
+
+  // ── الـ outputs ──
+  const outputs = {
+    finalPrompt:    window._fsFinalPrompt    || '',
+    seedancePrompt: window._fsSeedancePrompt || '',
+  };
+
+  // التحقق من وجود بيانات فعلية
+  const hasRealChars = chars.some(c => c.name.trim() || c.desc.trim());
+  const hasRealShots = shots.some(s => s.name.trim() || s.desc.trim());
+  const hasData = formData.rawStory.trim() || formData.sceneTitle.trim() || hasRealChars || hasRealShots || outputs.finalPrompt;
+  if (!hasData) {
+    fshowToast('⚠️ لا يوجد بيانات للحفظ — أدخل بيانات النموذج أولاً', 'error');
+    return;
+  }
+
+  if (typeof projects === 'undefined') return;
+
+  const activeId = window._fsActiveProjectId;
+  const list = projects['fullscene'];
+  const idx = activeId != null ? list.findIndex(p => p.id === activeId) : -1;
+
+  if (idx !== -1) {
+    // ── تحديث المشروع الحالي ──
+    list[idx] = { ...list[idx], name: title, date: now, formData, chars, shots, outputs };
+    fshowToast('✓ تم تحديث المشروع', 'success');
+  } else {
+    // ── إنشاء مشروع جديد ──
+    const newId = Date.now();
+    window._fsActiveProjectId = newId;
+    list.push({ id: newId, name: title, date: now, formData, chars, shots, outputs });
+    fshowToast('✓ تم حفظ المشروع', 'success');
+  }
+
+  renderProjects('fullscene');
+}
+
+function fsRestoreProject(p) {
+  if (!p) return;
+  const { formData, chars, shots, outputs } = p;
+
+  // ── استعادة حقول النموذج ──
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el && v !== undefined) el.value = v; };
+  setVal('fs-raw-story',   formData.rawStory);
+  setVal('fs-scene-title', formData.sceneTitle);
+  setVal('fs-summary',     formData.summary);
+  setVal('fs-duration',    formData.duration);
+  setVal('fs-env',         formData.env);
+  setVal('fs-time',        formData.time);
+  setVal('fs-location',    formData.location);
+  setVal('fs-total-dur',   formData.totalDur);
+  setVal('fs-shots-count', formData.shotsCount);
+  fsCheckAutofillReady();
+
+  // الاستايل
+  if (formData.style) {
+    const opt = FS_STYLE_OPTIONS?.find(o => o.value === formData.style);
+    if (opt) fsSelectStyle(opt);
+  }
+
+  // ── استعادة الشخصيات ──
+  fsCharCount = 0;
+  document.getElementById('fs-chars-container').innerHTML = '';
+  (chars || []).forEach(c => {
+    fsAddChar();
+    const id = fsCharCount;
+    setVal(`fsc${id}-name`,   c.name);
+    setVal(`fsc${id}-ref`,    c.ref);
+    setVal(`fsc${id}-age`,    c.age);
+    setVal(`fsc${id}-role`,   c.role);
+    setVal(`fsc${id}-desc`,   c.desc);
+    setVal(`fsc${id}-prompt`, c.prompt);
+    fsUpdateCharTitle(id);
+  });
+
+  // ── استعادة اللقطات ──
+  fsShotCount = 0;
+  document.getElementById('fs-shots-container').innerHTML = '';
+  (shots || []).forEach(s => {
+    fsAddShot();
+    const id = fsShotCount;
+    setVal(`fss${id}-name`,   s.name);
+    setVal(`fss${id}-dur`,    s.dur);
+    setVal(`fss${id}-size`,   s.size);
+    setVal(`fss${id}-cam`,    s.cam);
+    setVal(`fss${id}-campos`, s.campos);
+    setVal(`fss${id}-mood`,   s.mood);
+    setVal(`fss${id}-desc`,   s.desc);
+    setVal(`fss${id}-neg`,    s.neg);
+    fsUpdateShotPreview(id);
+  });
+
+  // ── استعادة الـ outputs ──
+  if (outputs?.finalPrompt) {
+    window._fsFinalPrompt = outputs.finalPrompt;
+    document.getElementById('fs-final-prompt-text').textContent = outputs.finalPrompt;
+    document.getElementById('fs-final-prompt-wrap').style.display = '';
+    document.getElementById('fs-output-section').classList.add('show');
+  }
+  if (outputs?.seedancePrompt) {
+    window._fsSeedancePrompt = outputs.seedancePrompt;
+    document.getElementById('fs-seedance-prompt-text').textContent = outputs.seedancePrompt;
+    document.getElementById('fs-seedance-prompt-wrap').style.display = '';
+  }
+}
+
+/* ═══════════════════════════════════════
+   API HELPER
+═══════════════════════════════════════ */
+async function fsCallAPI({ system, userText, userContent }) {
+  const messages = [{ role: 'user', content: userContent || [{ type: 'text', text: userText }] }];
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 4000, system, messages })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'API error ' + res.status);
+  return data.content?.find(b => b.type === 'text')?.text || '';
+}
+
+/* ═══════════════════════════════════════
+   UTILS
+═══════════════════════════════════════ */
+function fshowToast(msg, type = 'success') {
+  const t = document.getElementById('fs-toast');
+  t.textContent = msg; t.className = `fs-toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+function fsCopyText(id) {
+  const el = document.getElementById(id);
+  if (!el || !el.value?.trim()) { fshowToast('⚠️ لا يوجد نص للنسخ', 'error'); return; }
+  const text = el.value;
+
+  const markDone = () => {
+    fshowToast('✓ تم النسخ', 'success');
+    const btn = event?.currentTarget;
+    if (btn) { const o = btn.textContent; btn.textContent = '✓ تم'; setTimeout(() => btn.textContent = o, 1800); }
+  };
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text).then(markDone).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.cssText = 'position:fixed;top:-9999px;opacity:0;';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); markDone(); } catch(e) { fshowToast('⚠️ تعذّر النسخ', 'error'); }
+      document.body.removeChild(ta);
+    });
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText = 'position:fixed;top:-9999px;opacity:0;';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); markDone(); } catch(e) { fshowToast('⚠️ تعذّر النسخ', 'error'); }
+    document.body.removeChild(ta);
+  }
+}
+</script>
+<script>
+// ─────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────
+function navigate(pageId, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  if (el) { el.classList.add('active'); }
+  else {
+    const found = document.querySelector('[data-page="' + pageId + '"]');
+    if (found) found.classList.add('active');
+  }
+}
+
+// ─────────────────────────────────────────
+// SIDEBAR TOGGLE
+// ─────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('collapsed');
+}
+
+// ─────────────────────────────────────────
+// PROJECTS TAB
+// ─────────────────────────────────────────
+function switchProjectTab(type, el) {
+  document.querySelectorAll('.projects-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.projects-list').forEach(l => l.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('proj-' + type).classList.add('active');
+}
+
+// ─────────────────────────────────────────
+// COPY TEXT
+// ─────────────────────────────────────────
+function copyText(id) {
+  const el = document.getElementById(id);
+  if (!el || !el.value) return;
+  navigator.clipboard.writeText(el.value);
+  // Brief visual feedback
+  const btn = event.target;
+  const orig = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = orig, 1500);
+}
+
+// ─────────────────────────────────────────
+// SYSTEM PROMPTS
+// ─────────────────────────────────────────
+const SYSTEM_PROMPTS = {
+  story_sheet: `You are a professional cinematic story consultant. Generate a detailed, structured story sheet for the given scene idea. Include: Title, Genre, Tone, Synopsis (3-5 sentences), Key Themes, and Narrative Arc. Be cinematic and professional. Output in clean structured text.`,
+
+  character_sheet: `You are a professional character designer and writer. Generate detailed character sheets for the given character descriptions. For each character include: Name, Role, Physical Description, Personality Traits, Background, and Motivation. Be vivid and cinematic. IMPORTANT: For character names, use ONLY the name as it appears in the story. If no name is mentioned in the story, use only the character's first name. Never invent or add family names, last names, or surnames.`,
+
+  scene_location: `You are a professional location scout and set designer. Generate a detailed location description suitable for film production. Include: Location Name, Visual Atmosphere, Lighting Conditions, Key Visual Elements, Sound Environment, and Cinematic Potential. Be evocative and detailed.`,
+
+  professional_story: `You are an award-winning screenwriter. Transform the given story idea into a professional, cinematic story narrative. Write with vivid imagery, clear structure, and professional storytelling craft. Include strong opening, rising tension, and a compelling resolution. 3-5 paragraphs.`,
+
+  story_prompt: `You are an expert AI image and video prompt engineer specializing in cinematic content. Convert the given professional story into a structured story prompt suitable for generating a visual story board or AI video. Format it clearly with scene beats and visual cues. Be specific and technical.`,
+
+  professional_character: `You are a professional character designer. Transform the given character description into a highly detailed, professional character profile. Include precise physical attributes, distinctive features, wardrobe, mannerisms, and visual presence. Write in a cinematic reference style. IMPORTANT: For character names, use ONLY the name as it appears in the input. If no name is mentioned, use only the character's first name. Never invent or add family names, last names, or surnames.`,
+
+  character_from_image: `You are a professional character analyst and designer. Based on the provided image, create a detailed character description and profile. Describe physical features, apparent personality, style, and cinematic potential. Be specific and vivid. IMPORTANT: For character names, use ONLY the name as it appears in any provided story or input. If no name is mentioned, use only a simple first name. Never invent or add family names, last names, or surnames.`,
+
+  character_prompt: `You are an expert AI prompt engineer specializing in cinematic character reference sheets. Generate a single comprehensive AI image generation prompt that produces a full CHARACTER SHEET grid image containing: (1) Front/Side/Back full-body views with character name and stats top-left, (2) Expression sheet with 4 facial close-ups labeled with emotions, (3) Action/pose panels relevant to the character's role, (4) Details panel showing costume and props close-ups, (5) Personality & Background text panel. All panels share consistent lighting, costume, and visual style. Photorealistic, 4K, cinematic lighting, professional photography. English only. IMPORTANT: Use ONLY the character name as given in the input. If no name is provided, use only a simple first name. Never add family names, last names, or surnames.`,
+
+  professional_scene: `You are a professional cinematographer and set designer. Transform the given location descriptions into vivid, cinematic scene descriptions. Include atmosphere, lighting, camera angles, textures, and mood. Write in a professional film production style.`,
+
+  scene_from_image: `You are a professional location analyst and cinematographer. Based on the provided image, create a detailed scene description including atmosphere, lighting conditions, visual elements, spatial dynamics, and cinematic potential.`,
+
+  scene_prompt: `You are an expert AI prompt engineer specializing in cinematic environments. Convert the given scene description into a professional AI generation prompt for location/environment visuals. Include style, lighting, atmosphere, and technical descriptors.`,
+
+  video_scenes: `You are a professional video director and prompt engineer. Break down the given video concept into detailed, scene-by-scene video generation prompts. For each scene include: Shot Type, Camera Movement, Subject Action, Environment, Lighting, and Mood. Number each scene clearly.`,
+
+  final_video_prompt: `You are a senior AI video prompt engineer. Combine the given scene prompts into a single, comprehensive, professional final video production prompt. Optimize it for AI video generation tools like Sora, Runway, or Kling. Include style consistency notes, technical parameters, and overall artistic direction.`
+};
+
+// ─────────────────────────────────────────
+// AI GENERATION
+// ─────────────────────────────────────────
+async function generateAI(inputId, outputId, promptType, btnEl) {
+  const inputEl = document.getElementById(inputId);
+  const outputEl = document.getElementById(outputId);
+  const input = inputEl.value.trim();
+
+  if (!input) {
+    inputEl.style.borderColor = '#444';
+    setTimeout(() => inputEl.style.borderColor = '', 1500);
+    return;
+  }
+
+  const triggerBtn = btnEl || null;
+  scSetBtnLoading(triggerBtn, true);
+
+  const labelMap = {
+    professional_story:    'Generating Story...',
+    story_prompt:          'Generating Story Prompt...',
+    professional_character:'Generating Character...',
+    character_from_image:  'Analyzing Image...',
+    character_prompt:      'Generating Character Prompt...',
+    professional_scene:    'Generating Scene...',
+    scene_from_image:      'Analyzing Scene Image...',
+    scene_prompt:          'Generating Scene Prompt...',
+    video_scenes:          'Generating Video Scenes...',
+    final_video_prompt:    'Generating Final Prompt...',
+  };
+  const subMap = {
+    professional_story:    'جاري توليد القصة الاحترافية...',
+    story_prompt:          'جاري توليد برومبت القصة...',
+    professional_character:'جاري توليد وصف الشخصية...',
+    character_from_image:  'جاري تحليل الصورة...',
+    character_prompt:      'جاري توليد برومبت الشخصية...',
+    professional_scene:    'جاري توليد وصف المشهد...',
+    scene_from_image:      'جاري تحليل صورة المشهد...',
+    scene_prompt:          'جاري توليد برومبت المشهد...',
+    video_scenes:          'جاري توليد مشاهد الفيديو...',
+    final_video_prompt:    'جاري توليد البرومبت النهائي...',
+  };
+
+  scShowLoading(
+    labelMap[promptType] || 'Generating...',
+    subMap[promptType]   || 'يرجى الانتظار...'
+  );
+
+  outputEl.value = '';
+  outputEl.placeholder = '...';
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPTS[promptType] || 'You are a professional creative writing assistant.',
+        messages: [{ role: 'user', content: input }]
+      })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      outputEl.value = 'API Error ' + response.status + ': ' + (data.error?.message || JSON.stringify(data));
+    } else {
+      outputEl.value = data.content?.[0]?.text || 'Error: Could not generate content.';
+    }
+  } catch (err) {
+    outputEl.value = 'Error: ' + err.message;
+  } finally {
+    scSetBtnLoading(triggerBtn, false);
+    scHideLoading();
+    outputEl.placeholder = '';
+  }
+}
+
+// Map spinner IDs
+function findSpinner(inputId, outputId, promptType) {
+  const map = {
+    'fs-story-output': 'sp-fs-story',
+    'fs-char-output': 'sp-fs-char',
+    'fs-loc-output': 'sp-fs-loc',
+    'story-output': 'sp-story',
+    'story-prompt-output': 'sp-story-prompt',
+    'char-output': 'sp-char',
+    'char-prompt-output': 'sp-char-prompt',
+    'scene-output': 'sp-scene',
+    'scene-prompt-output': 'sp-scene-prompt',
+    'video-scenes-output': 'sp-video-scenes',
+    'video-final-output': 'sp-video-final'
+  };
+  return document.getElementById(map[outputId]);
+}
+
+// ─────────────────────────────────────────
+// GENERATE FINAL PROMPT (Full Scene)
+// ─────────────────────────────────────────
+async function generateFinalPrompt(btnEl) {
+  const story = document.getElementById('fs-story-output').value;
+  const chars = document.getElementById('fs-char-output').value;
+  const locs = document.getElementById('fs-loc-output').value;
+
+  if (!story && !chars && !locs) {
+    alert('Please generate at least one section first.');
+    return;
+  }
+
+  const triggerBtn = btnEl || null;
+  scSetBtnLoading(triggerBtn, true);
+  scShowLoading('Generating Final Prompt...', 'جاري توليد البرومبت النهائي...');
+
+  const combined = `STORY SHEET:\n${story}\n\nCHARACTERS:\n${chars}\n\nLOCATIONS:\n${locs}`;
+  const outputEl = document.getElementById('fs-final-output');
+  outputEl.value = ''; outputEl.placeholder = '...';
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+        system: SYSTEM_PROMPTS['final_video_prompt'],
+        messages: [{ role: 'user', content: combined }]
+      })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      outputEl.value = 'API Error ' + response.status + ': ' + (data.error?.message || JSON.stringify(data));
+    } else {
+      outputEl.value = data.content?.[0]?.text || 'Error generating prompt.';
+    }
+  } catch (err) {
+    outputEl.value = 'Error: ' + err.message;
+  } finally {
+    scSetBtnLoading(triggerBtn, false);
+    scHideLoading();
+    outputEl.placeholder = '';
+  }
+}
+
+// ─────────────────────────────────────────
+// IMAGE UPLOAD
+// ─────────────────────────────────────────
+function handleImageUpload(event, previewId, dataId) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const base64 = e.target.result.split(',')[1];
+    document.getElementById(dataId).value = base64;
+
+    // Show preview
+    const previewDiv = document.getElementById(previewId);
+    const previewImg = document.getElementById(previewId + '-img');
+    if (previewDiv && previewImg) {
+      previewImg.src = e.target.result;
+      previewDiv.style.display = 'block';
+    }
+
+    // Show generate from image button
+    const btnId = dataId.replace('-image-data', '-image-btn');
+    const btn = document.getElementById(btnId);
+    if (btn) btn.style.display = 'inline-flex';
+  };
+  reader.readAsDataURL(file);
+}
+
+// ─────────────────────────────────────────
+// GENERATE FROM IMAGE
+// ─────────────────────────────────────────
+async function generateFromImage(dataId, outputId, promptType, btnEl) {
+  const base64 = document.getElementById(dataId).value;
+  if (!base64) return;
+
+  const triggerBtn = btnEl || null;
+  scSetBtnLoading(triggerBtn, true);
+  scShowLoading('Analyzing Image...', 'جاري تحليل الصورة...');
+
+  const outputEl = document.getElementById(outputId);
+  outputEl.value = ''; outputEl.placeholder = '...';
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+        system: SYSTEM_PROMPTS[promptType],
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: base64 } },
+            { type: 'text', text: 'Analyze this image and generate a professional description.' }
+          ]
+        }]
+      })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      outputEl.value = 'API Error ' + response.status + ': ' + (data.error?.message || JSON.stringify(data));
+    } else {
+      outputEl.value = data.content?.[0]?.text || 'Error analyzing image.';
+    }
+  } catch (err) {
+    outputEl.value = 'Error: ' + err.message;
+  } finally {
+    scSetBtnLoading(triggerBtn, false);
+    scHideLoading();
+    outputEl.placeholder = '';
+  }
+}
+
+// ─────────────────────────────────────────
+// SAVE PROJECT
+// ─────────────────────────────────────────
+const projects = { fullscene: [], story: [], character: [], scene: [], video: [] };
+
+function saveProject(type) {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  const idMap = {
+    story:     'story-output',
+    character: 'char-output',
+    scene:     'scene-output',
+    video:     'video-final-output',
+  };
+
+  if (type === 'fullscene') {
+    fsSaveProject();
+    return;
+  }
+
+  const el = document.getElementById(idMap[type]);
+  const content = el ? el.value.trim() : '';
+
+  if (!content) { alert('Nothing to save yet. Generate content first.'); return; }
+
+  const name = content.split('\n')[0].substring(0, 40) || 'Untitled Project';
+  projects[type].push({ name, date: dateStr, content });
+  renderProjects(type);
+
+  const btn = event.target;
+  const orig = btn.textContent;
+  btn.textContent = '✓ Saved!';
+  setTimeout(() => btn.textContent = orig, 1500);
+}
+
+function renderProjects(type) {
+  const container = document.getElementById('proj-' + type);
+  if (!container) return;
+
+  if (projects[type].length === 0) {
+    container.innerHTML = '<div class="project-empty">No projects saved yet.</div>';
+    return;
+  }
+
+  container.innerHTML = projects[type].map((p, i) => `
+    <div class="project-item">
+      <div class="project-item-left">
+        <div class="project-dot"></div>
+        <div>
+          <div class="project-name">${p.name}</div>
+          <div class="project-date">${p.date}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-shrink:0;">
+        <button onclick="openProject('${type}',${i})" style="background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa;font-size:11px;padding:5px 12px;border-radius:6px;cursor:pointer;">⊕ فتح</button>
+        <button onclick="deleteProject('${type}',${i})" style="background:transparent;border:1px solid rgba(239,68,68,0.2);color:#fca5a5;font-size:11px;padding:5px 10px;border-radius:6px;cursor:pointer;">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openProject(type, idx) {
+  const p = projects[type]?.[idx];
+  if (!p) return;
+
+  const pageMap = {
+    story:      { page: 'story',     outputId: 'story-output' },
+    character:  { page: 'character', outputId: 'char-output' },
+    scene:      { page: 'scene',     outputId: 'scene-output' },
+    video:      { page: 'video',     outputId: 'video-final-output' },
+    fullscene:  { page: 'fullscene', outputId: null },
+  };
+
+  const target = pageMap[type];
+  if (!target) return;
+
+  const navItem = document.querySelector(`.nav-item[data-page="${target.page}"]`);
+  if (navItem) navigate(target.page, navItem);
+
+  setTimeout(() => {
+    if (type === 'fullscene') {
+      window._fsActiveProjectId = p.id ?? null;
+      fsRestoreProject(p);
+      document.getElementById('fs-output-section')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      const el = document.getElementById(target.outputId);
+      if (el) {
+        el.value = p.content;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+    fshowToast('✓ تم فتح المشروع', 'success');
+  }, 150);
+}
+
+function deleteProject(type, idx) {
+  projects[type].splice(idx, 1);
+  renderProjects(type);
+  fshowToast('✓ تم حذف المشروع', 'success');
+}
+</script>
+<!-- ── CLEAR CONFIRM DIALOG ── -->
+<div id="fs-clear-dialog" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
+  <div style="background:#111;border:1px solid #222;border-radius:14px;padding:28px 32px;max-width:360px;width:90%;text-align:center;">
+    <div style="font-size:28px;margin-bottom:12px;">🗑️</div>
+    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:#e8e8e8;margin-bottom:8px;">مسح جميع البيانات؟</div>
+    <div style="font-size:13px;color:#666;line-height:1.6;margin-bottom:24px;">سيتم حذف القصة والشخصيات واللقطات والنتائج بشكل نهائي. هذا الإجراء لا يمكن التراجع عنه.</div>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button onclick="fsConfirmClear(false)" style="flex:1;padding:10px;background:transparent;border:1px solid #2a2a2a;border-radius:8px;color:#888;font-size:13px;cursor:pointer;">إلغاء</button>
+      <button onclick="fsConfirmClear(true)" style="flex:1;padding:10px;background:#1a0a0a;border:1px solid rgba(239,68,68,0.3);border-radius:8px;color:#fca5a5;font-size:13px;font-weight:600;cursor:pointer;">مسح الكل</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
